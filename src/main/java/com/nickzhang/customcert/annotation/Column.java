@@ -19,7 +19,10 @@ public @interface Column {
     String dbName() default "";
     @AliasFor(annotation = TableField.class, attribute = "exists")
     boolean exists() default true;
-
+    /**
+     * 对应xml文件中字段名称,多级名称用/分割
+     * @example: "xmlNode1/xmlNode2/xmlNode3"
+     */
     String xmlName() default "";
     /**
      * 是否在列表中显示
