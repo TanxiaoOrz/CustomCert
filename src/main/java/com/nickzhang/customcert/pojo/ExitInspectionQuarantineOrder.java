@@ -1,6 +1,7 @@
 package com.nickzhang.customcert.pojo;
 
 import com.nickzhang.customcert.annotation.Table;
+import lombok.Data;
 
 /**
  * @Author: 张骏山
@@ -10,6 +11,7 @@ import com.nickzhang.customcert.annotation.Table;
  * @Description: 出入境检疫单
  * @Version: 1.0
  */
+@Data
 @Table(xmlName = "EEntDeclIo", dbName = "Dcl_B_Io_Decl")
 public class ExitInspectionQuarantineOrder {
 
