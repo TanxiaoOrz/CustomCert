@@ -21,6 +21,10 @@ import java.lang.reflect.Field;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Column {
+
+    public final static String LINK_SEPARATOR = "-";
+    public final static String XNL_SEPARATOR = "/";
+
     @AliasFor(annotation = TableField.class, attribute = "value")
     String dbName() default "";
     @AliasFor(annotation = TableField.class, attribute = "exists")
@@ -54,6 +58,5 @@ public @interface Column {
       * @showColumn: 关联表显示字段 必填
       * @idColumn: 关联表主键字段 选填 默认id
       */
-    String linkColumn() default "";
-
+    String linkTableColumn() default "";
 }
