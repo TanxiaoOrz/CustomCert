@@ -1,7 +1,13 @@
 package com.nickzhang.customcert.annotation;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 import org.springframework.core.annotation.AliasFor;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @Author: 张骏山
@@ -12,6 +18,8 @@ import org.springframework.core.annotation.AliasFor;
  * @Version: 1.0
  */
 @TableName
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 public @interface Table {
     /**
      * 数据库表名称

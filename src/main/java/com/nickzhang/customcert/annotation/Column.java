@@ -3,6 +3,10 @@ package com.nickzhang.customcert.annotation;
 import com.baomidou.mybatisplus.annotation.TableField;
 import org.springframework.core.annotation.AliasFor;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 
 /**
@@ -14,6 +18,8 @@ import java.lang.reflect.Field;
  * @Version: 1.0
  */
 @TableField
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
 public @interface Column {
     @AliasFor(annotation = TableField.class, attribute = "value")
     String dbName() default "";
