@@ -3,6 +3,7 @@ package com.nickzhang.customcert.dto;
 import com.nickzhang.customcert.annotation.Column;
 import com.nickzhang.customcert.annotation.Table;
 import com.nickzhang.customcert.mapper.UtilsMapper;
+import com.nickzhang.customcert.utils.NodeUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -15,11 +16,10 @@ import javax.xml.transform.stream.StreamResult;
 
 import java.io.StringWriter;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+
+import static com.nickzhang.customcert.annotation.Column.LINK_SEPARATOR;
+import static com.nickzhang.customcert.annotation.Column.XNL_SEPARATOR;
 
 /**
  * @Author: 张骏山
@@ -30,7 +30,8 @@ import java.util.List;
  * @Version: 1.0
  */
 public class XmlProducer {
-    private final List<XmlProducerNode> nodes = new ArrayList<>();
+    private final List<XmlProducerNode> children = new ArrayList<>();
+    private HashMap<String, XmlProducerNode> cache = new HashMap<>();
     private DocumentBuilder builder ;
 
 
@@ -72,6 +73,12 @@ public class XmlProducer {
 
     }
 
+    /**
+     * 初始化xml文件生产类
+     * @param tableClass 主表类
+     * @param detailClasses 明细表类列表
+     * @return 当前xml文件生产类实例
+     */
     public XmlProducer initialize(Class<?> tableClass, List<Class<?>> detailClasses) {
         try {
             builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -81,28 +88,71 @@ public class XmlProducer {
         }
         Table mainTable = tableClass.getAnnotation(Table.class);
         xmlRootName = mainTable.xmlName();
-
         Arrays.stream(tableClass.getDeclaredFields()).forEach(field -> {
             Column column = field.getAnnotation(Column.class);
-            if (column != null && column.xmlName() != null && !column.xmlName().isEmpty()) {
-                XmlProducerNode node;
-                if (column.linkColumn().isEmpty()) { // 文本字段
-                    node = new XmlProducerNode(getLastSegmentAfterSlash(column.xmlName()), getGetterMethod(tableClass, field));
+            if (column != null) {
+                String xmlName = column.xmlName();
+                if (xmlName != null && !xmlName.isEmpty()) {
+                    XmlProducerNode node = getBaseNode(tableClass, field, column, xmlName);
+                    NodeUtils.addChild(node, xmlName.split(XNL_SEPARATOR), children, cache);
                 }
-               // TODO 关联浏览字段
             }
         });
+        detailClasses.forEach(detailClass -> {
+            // 处理明细表主数组节点
+            String detailXmlPath = detailClass.getAnnotation(Table.class).xmlName();
+            String[] detailXmlPathSegments = detailXmlPath.split(XNL_SEPARATOR);
+            XmlProducerNode detailNode = new XmlProducerNode(detailXmlPathSegments[detailXmlPathSegments.length - 1], new ArrayList<>());
+            NodeUtils.addChild(detailNode, detailXmlPathSegments, children, cache);
+            // 处理明细表子节点
+            Arrays.stream(detailClass.getDeclaredFields()).forEach(field -> {
+                Column column = field.getAnnotation(Column.class);
+                if (column != null) {
+                    String xmlName = column.xmlName();
+                    if (xmlName != null && !xmlName.isEmpty()) {
+                        XmlProducerNode node = getBaseNode(detailClass, field, column, xmlName);;
+                        detailNode.addChild(node, xmlName.split(XNL_SEPARATOR));
+                    }
+                }
+            });
+        });
 
-
+        // 清理缓存
+        cache = null;
+        children.forEach(XmlProducerNode::clearCache);
 
         return this;
     }
 
-    public String getXmlText (Object o, UtilsMapper utilsMapper) {
+    private XmlProducerNode getBaseNode(Class<?> detailClass, Field field, Column column, String xmlName) {
+        XmlProducerNode node;
+        int depth = NodeUtils.countSlashes(xmlName);
+        String linkTableColumn = column.linkTableColumn();
+        if (linkTableColumn.isEmpty()) { // 文本字段
+            node = new XmlProducerNode(NodeUtils.getLastSegmentAfterSlash(xmlName), NodeUtils.getGetterMethod(detailClass, field));
+        } else {
+            String linkTableMainColumn;
+            String linkTableName;
+            String linkTableColumnShow;
+            try {
+                String[] browserConfig = linkTableColumn.split(LINK_SEPARATOR);
+                linkTableName = browserConfig[0];
+                linkTableColumnShow = browserConfig[1];
+                linkTableMainColumn = browserConfig.length > 2 ? browserConfig[2] : "id";
+            } catch (ArrayIndexOutOfBoundsException e) {
+                throw new RuntimeException("关联浏览字段配置错误，格式为：关联表名-关联表显示字段[-主建id]}", e);
+            }
+            node = new XmlProducerNode(NodeUtils.getLastSegmentAfterSlash(xmlName), NodeUtils.getGetterMethod(detailClass, field),
+                    linkTableName, linkTableMainColumn, linkTableColumnShow);
+        }
+        return node;
+    }
+
+    public String getXmlText(Object o, UtilsMapper utilsMapper) {
         Document document = builder.newDocument(); /* 生成xml文档 */
         Element rootElement = document.createElement(xmlRootName); /* 生成xml根节点 */
         xmlRootAttributes.forEach(rootElement::setAttribute); /* 为xml根节点添加属性 */
-        nodes.forEach(node -> rootElement.appendChild(node.getXmlElement( o, utilsMapper,document))); /* 为xml根节点添加子节点 */
+        children.forEach(node -> rootElement.appendChild(node.getXmlElement( o, utilsMapper,document))); /* 为xml根节点添加子节点 */
         Transformer transformer = null;
         try {
             transformer = factory.newTransformer();
@@ -125,88 +175,6 @@ public class XmlProducer {
         }
 
         return writer.toString();
-    }
-
-    /**
-     * 根据字段获取对应的 get/is 方法
-     * @param clazz 字段所属的类
-     * @param field 目标字段
-     * @return 对应的 get/is 方法（无则返回 null）
-     */
-    public static Method getGetterMethod(Class<?> clazz, Field field) {
-        if (clazz == null || field == null) {
-            return null;
-        }
-
-        String fieldName = field.getName();
-        Class<?> fieldType = field.getType();
-        String methodName;
-
-        // 1. 拼接方法名（区分布尔类型和普通类型）
-        if (fieldType == boolean.class) {
-            // 布尔类型优先拼接 isXXX，兼容 getXXX
-            methodName = "is" + capitalizeFirstLetter(fieldName);
-            Method isMethod = null;
-            try {
-                isMethod = clazz.getMethod(methodName);
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException("xml生成解析器失败,类 " + clazz.getName() + " 中不存在方法 " + methodName, e);
-            }
-            return isMethod;
-            // 如果 isXXX 不存在，尝试 getXXX
-        } else if ( fieldType == Boolean.class) {
-            // 布尔类型优先拼接 isXXX，兼容 getXXX
-            methodName = "is" + capitalizeFirstLetter(fieldName);
-            Method isMethod = null;
-            try {
-                isMethod = clazz.getMethod(methodName);
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException("xml生成解析器失败,类 " + clazz.getName() + " 中不存在方法 " + methodName, e);
-            }
-            return isMethod;
-            // 如果 isXXX 不存在，尝试 getXXX
-        } else {
-            // 普通类型拼接 getXXX
-            methodName = "get" + capitalizeFirstLetter(fieldName);
-        }
-
-        // 2. 获取方法（无参数）
-        return getMethod(clazz, methodName);
-    }
-
-    /**
-     * 首字母大写（处理字段名首字母小写的情况）
-     * @param str 原始字符串
-     * @return 首字母大写后的字符串
-     */
-    private static String capitalizeFirstLetter(String str) {
-        if (str == null || str.isEmpty()) {
-            return str;
-        }
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
-    }
-
-    /**
-     * 获取最后一个 '/' 后的文本，无 '/' 则返回原字符串
-     * @param input 输入字符串
-     * @return 处理后的字符串
-     */
-    public static String getLastSegmentAfterSlash(String input) {
-        // 空值判断，避免空指针异常
-        if (input == null) {
-            return null;
-        }
-
-        // 找到最后一个 '/' 的位置
-        int lastSlashIndex = input.lastIndexOf('/');
-
-        // 如果没找到 '/'（索引为 -1），直接返回原字符串
-        if (lastSlashIndex == -1) {
-            return input;
-        }
-
-        // 截取最后一个 '/' 之后的子串
-        return input.substring(lastSlashIndex + 1);
     }
 
 }

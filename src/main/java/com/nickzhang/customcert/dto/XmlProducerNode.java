@@ -1,11 +1,14 @@
 package com.nickzhang.customcert.dto;
 
 import com.nickzhang.customcert.mapper.UtilsMapper;
+import com.nickzhang.customcert.utils.NodeUtils;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -35,7 +38,14 @@ public class XmlProducerNode {
 
     private final int xmlNodeType;
 
+    /**
+     * 子节点列表
+     */
     private final List<XmlProducerNode> children;
+    /**
+     * 子节点初始化时的缓存，用于快速查找子节点
+     */
+    private HashMap<String, XmlProducerNode> cache;
 
     private final Method getValueMethod;
 
@@ -47,11 +57,28 @@ public class XmlProducerNode {
      * @param xmlNodeName xml节点名称
      * @param children 子节点列表
      */
-    public XmlProducerNode(String xmlNodeName, List<XmlProducerNode> children) {
+    public XmlProducerNode(String xmlNodeName, @NotNull List<XmlProducerNode> children) {
         this.xmlNodeName = xmlNodeName;
         this.xmlNodeType = NODE_TYPE_ELEMENT;
         this.children = children;
         this.getValueMethod = null;
+        this.cache = new HashMap<>();
+        for (XmlProducerNode child : children) {
+            cache.put(child.xmlNodeName, child);
+        }
+    }
+
+    /**
+     * 元素节点构造函数 默认赋值NODE_TYPE_ELEMENT
+     * @param xmlNodeName xml节点名称
+     * @param children 子节点列表
+     */
+    public XmlProducerNode(String xmlNodeName, List<XmlProducerNode> children, HashMap<String, XmlProducerNode> cache) {
+        this.xmlNodeName = xmlNodeName;
+        this.xmlNodeType = NODE_TYPE_ELEMENT;
+        this.children = children;
+        this.getValueMethod = null;
+        this.cache = cache;
     }
     /**
      * 文本节点构造函数
@@ -62,7 +89,8 @@ public class XmlProducerNode {
         this.xmlNodeName = xmlNodeName;
         this.xmlNodeType = NODE_TYPE_TEXT;
         this.getValueMethod = getValueMethod;
-        children = null;
+        this.children = null;
+        this.cache = null;
     }
 
     /**
@@ -87,11 +115,24 @@ public class XmlProducerNode {
      * @param child 子节点
      * @throws IllegalArgumentException 元素节点才能添加子节点
      */
-    protected void AddChild(XmlProducerNode child) {
+    public void addChild(XmlProducerNode child, String[] xmlNodeNames) {
+        if (cache == null)
+            throw new RuntimeException("xml固定后不得添加子节点");
         if (children == null || xmlNodeType != NODE_TYPE_ELEMENT) {
             throw new IllegalArgumentException("元素节点才能添加子节点");
         }
-        children.add(child);
+        NodeUtils.addChild(child, xmlNodeNames, children, cache);
+    }
+
+
+
+    /**
+     * 初始化完成,抛弃缓存
+     */
+    protected void clearCache() {
+        cache = null;
+        if (children != null)
+            children.forEach(XmlProducerNode::clearCache);
     }
 
     /**
