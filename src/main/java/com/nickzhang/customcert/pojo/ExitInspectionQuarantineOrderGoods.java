@@ -15,4 +15,6 @@ import lombok.Data;
 @Table(xmlName = "ITF_DCL_IO_DECL_GOODS", dbName = "Dcl_B_Io_Decl_Goods")
 public class ExitInspectionQuarantineOrderGoods {
 
+
+
 }
