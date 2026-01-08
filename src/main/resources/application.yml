@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    dynamic:
+      primary: master
+      enable: true
+      strict: false
+      master:
+        url: jdbc:sqlserver://localhost:1433;databaseName=customcert;encrypt=true;trustServerCertificate=true
+        username: sa
+        password: 123456
+        driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      pojo:
+        url: jdbc:sqlserver://localhost:1433;databaseName=RJECIQ;encrypt=true;trustServerCertificate=true
+        username: sa
+        password: 123456
+        driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
