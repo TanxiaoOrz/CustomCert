@@ -127,20 +127,18 @@ public class XmlProducer {
         // 构造数据获取器
         AtomicReference<Method> mainIdGetterMethod = new AtomicReference<>();
         AtomicReference<String> mainIdFieldName = new AtomicReference<>();
-        fields.stream().filter(field -> (field).getAnnotation(TableId.class) != null)
-                .findFirst().ifPresentOrElse(
+        fields.stream().filter(field -> {
+                    Column annotation = (field).getAnnotation(Column.class);
+                    if (annotation == null) {
+                        return false;
+                    }
+                    return annotation.joinKey();
+                }).findFirst().ifPresentOrElse(
                         field -> {
                             mainIdGetterMethod.set(NodeUtils.getGetterMethod(table, field));
-                            mainIdFieldName.set(field.getName());
+                            mainIdFieldName.set(field.getAnnotation(Column.class).joinColumn());
                         },
-                        () -> {
-                            mainIdFieldName.set("id");
-                            try {
-                                mainIdGetterMethod.set(NodeUtils.getGetterMethod(table, table.getField("id")));
-                            } catch (NoSuchFieldException e) {
-                                throw new RuntimeException("表" + table.getName() + "没有id字段且未标主键字段", e);
-                            }
-                        }
+                        () -> {throw new RuntimeException("明细表" + table.getName() + "无链接主键字段");}
                 );
 
 
