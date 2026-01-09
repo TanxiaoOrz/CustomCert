@@ -43,38 +43,29 @@ public class NodeUtils {
         if (fieldType == boolean.class || fieldType == Boolean.class) {
             // 布尔类型优先拼接 isXXX，兼容 getXXX
             methodName = "is" + capitalizeFirstLetter(fieldName);
-            Method isMethod = null;
+            Method method;
             try {
-                isMethod = clazz.getMethod(methodName);
+                method = clazz.getMethod(methodName);
             } catch (NoSuchMethodException e) {
-                throw new RuntimeException("xml生成解析器失败,类 " + clazz.getName() + " 中不存在方法 " + methodName, e);
-            }
-            if (isMethod == null) {
-                Method getMethod = null;
                 // 布尔类型不存在 isXXX 方法，尝试 getXXX
                 methodName = "get" + capitalizeFirstLetter(fieldName);
                 try {
-                    getMethod = clazz.getMethod(methodName);
-                } catch (NoSuchMethodException e) {
-                    throw new RuntimeException("xml生成解析器失败,类 " + clazz.getName() + " 中不存在方法 " + methodName, e);
+                    method = clazz.getMethod(methodName);
+                } catch (NoSuchMethodException e1) {
+                    throw new RuntimeException("xml生成解析器失败,类 " + clazz.getName() + " 中不存在方法 " + methodName, e1);
                 }
-                return getMethod;
-            } else {
-                return isMethod;
-
             }
-            // 如果 isXXX 不存在，尝试 getXXX
+            return method;
         } else {
-            // 布尔类型优先拼接 isXXX，兼容 getXXX
+            // 文本类型优先拼接 getXXX
             methodName = "get" + capitalizeFirstLetter(fieldName);
-            Method getMethod = null;
+            Method getMethod;
             try {
                 getMethod = clazz.getMethod(methodName);
             } catch (NoSuchMethodException e) {
                 throw new RuntimeException("xml生成解析器失败,类 " + clazz.getName() + " 中不存在方法 " + methodName, e);
             }
             return getMethod;
-            // 如果 isXXX 不存在，尝试 getXXX
         }
     }
 
@@ -140,11 +131,24 @@ public class NodeUtils {
 
     public static void addChild(XmlProducerNode child, String[] xmlNodeNames, List<XmlProducerNode> children, HashMap<String, XmlProducerNode> cache) {
         String currentName = xmlNodeNames[0];
+        // 单层节点直接添加到子节点列表
         if (xmlNodeNames.length == 1) {
-            children.add(child);
-            cache.put(currentName, child);
+            if (cache.containsKey(currentName)) {
+                /*
+                  若节点已存在，且为元素节点或元素列表节点，则进行合并操作
+                 */
+                if (child.getXmlNodeType()==(XmlProducerNode.NODE_TYPE_ELEMENT_LIST) || child.getXmlNodeType()==(XmlProducerNode.NODE_TYPE_ELEMENT)) {
+                    XmlProducerNode origin = cache.get(currentName);
+                    child.getChildren().forEach(c -> origin.addChild(c,new String[]{c.getXmlNodeName()}));
+                }
+            }
+            else {
+                children.add(child);
+                cache.put(currentName, child);
+            }
         }
         else {
+            // 递归添加子节点
             XmlProducerNode xmlProducerNode = cache.get(currentName);
             if (xmlProducerNode == null) {
                 xmlProducerNode = new XmlProducerNode(currentName, new ArrayList<>());

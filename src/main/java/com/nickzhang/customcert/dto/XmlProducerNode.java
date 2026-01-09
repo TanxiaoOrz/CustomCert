@@ -2,6 +2,7 @@ package com.nickzhang.customcert.dto;
 
 import com.nickzhang.customcert.mapper.UtilsMapper;
 import com.nickzhang.customcert.utils.NodeUtils;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,21 +27,28 @@ public class XmlProducerNode {
      */
     public static final int NODE_TYPE_TEXT = 0;
     /**
-     * xml节点类型 元素节点
-     */
-    public static final int NODE_TYPE_ELEMENT = 1;
-    /**
      * xml节点类型 关联浏览代理节点
      */
-    public static final int NODE_TYPE_BROWSER = 2;
+    public static final int NODE_TYPE_BROWSER = 1;
+    /**
+     * xml节点类型 单元素节点
+     */
+    public static final int NODE_TYPE_ELEMENT = 2;
+    /**
+     * xml节点类型 多元素节点列表
+     */
+    public static final int NODE_TYPE_ELEMENT_LIST = 3;
 
+    @Getter
     private final String xmlNodeName;
 
+    @Getter
     private final int xmlNodeType;
 
     /**
      * 子节点列表
      */
+    @Getter
     private final List<XmlProducerNode> children;
     /**
      * 子节点初始化时的缓存，用于快速查找子节点
@@ -48,6 +56,8 @@ public class XmlProducerNode {
     private HashMap<String, XmlProducerNode> cache;
 
     private final Method getValueMethod;
+
+    private String elementsClassName;
 
     private String browserTableName;
     private String browserTableMainColumn;
@@ -69,17 +79,24 @@ public class XmlProducerNode {
     }
 
     /**
-     * 元素节点构造函数 默认赋值NODE_TYPE_ELEMENT
+     * 元素列表节点构造函数 默认赋值NODE_TYPE_ELEMENT_LIST
      * @param xmlNodeName xml节点名称
      * @param children 子节点列表
+     * @param elementsClassName 元素列表类全限定名
      */
-    public XmlProducerNode(String xmlNodeName, List<XmlProducerNode> children, HashMap<String, XmlProducerNode> cache) {
+    public XmlProducerNode(String xmlNodeName, @NotNull List<XmlProducerNode> children, String elementsClassName) {
         this.xmlNodeName = xmlNodeName;
-        this.xmlNodeType = NODE_TYPE_ELEMENT;
+        this.xmlNodeType = NODE_TYPE_ELEMENT_LIST;
         this.children = children;
         this.getValueMethod = null;
-        this.cache = cache;
+        this.cache = new HashMap<>();
+        for (XmlProducerNode child : children) {
+            cache.put(child.xmlNodeName, child);
+        }
+        this.elementsClassName = elementsClassName;
     }
+
+
     /**
      * 文本节点构造函数
      * @param xmlNodeName xml节点名称
@@ -118,7 +135,7 @@ public class XmlProducerNode {
     public void addChild(XmlProducerNode child, String[] xmlNodeNames) {
         if (cache == null)
             throw new RuntimeException("xml固定后不得添加子节点");
-        if (children == null || xmlNodeType != NODE_TYPE_ELEMENT) {
+        if (children == null || (xmlNodeType != NODE_TYPE_ELEMENT && xmlNodeType != NODE_TYPE_ELEMENT_LIST)) {
             throw new IllegalArgumentException("元素节点才能添加子节点");
         }
         NodeUtils.addChild(child, xmlNodeNames, children, cache);
@@ -136,36 +153,56 @@ public class XmlProducerNode {
     }
 
     /**
-     * 获取 xml节点元素
-     * @param object 数据对象
+     * 获取 xml节点元素 并添加到belongs节点下
+     * @param xmlData xml数据对象
      * @param mapper 数据库映射器
      * @param document xml文档对象
-     * @return xml节点元素
+     * @param belongs 父节点元素
      */
-    protected Element getXmlElement(Object object, UtilsMapper mapper, Document document) {
-        Element nodeElement = document.createElement(xmlNodeName);
+    protected void appendChildren(XmlData xmlData, UtilsMapper mapper, Document document, Element belongs) {
+        Object currentData = xmlData.getCurrentData();
         switch (xmlNodeType) {
-            case NODE_TYPE_TEXT:
-                String textValue = null;
+            case NODE_TYPE_TEXT: {
+                Element nodeElement = document.createElement(xmlNodeName);
+                String textValue;
                 try {
-                    textValue = (String) getValueMethod.invoke(object);
+                    textValue = (String) getValueMethod.invoke(currentData);
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
                 }
                 nodeElement.appendChild(document.createTextNode(textValue));
-                return null;
-            case NODE_TYPE_ELEMENT:
-                children.forEach(child -> nodeElement.appendChild(child.getXmlElement(object, mapper, document)));
-                return nodeElement;
-            case NODE_TYPE_BROWSER:
-                String browserShowName = null;
+                belongs.appendChild(nodeElement);
+                return;
+            }
+            case NODE_TYPE_ELEMENT: {
+                Element nodeElement = document.createElement(xmlNodeName);
+                children.forEach(child -> child.appendChildren(xmlData, mapper, document, nodeElement));
+                belongs.appendChild(nodeElement);
+                return;
+            }
+            case NODE_TYPE_ELEMENT_LIST: {
+                List<XmlData> xmlDataChildren = xmlData.getChildren(elementsClassName);
+                xmlDataChildren.forEach(data -> {
+                    Element nodeElement = document.createElement(xmlNodeName);
+                    children.forEach(child ->
+                        child.appendChildren(data, mapper, document, nodeElement)
+                    );
+                    belongs.appendChild(nodeElement);
+                });
+                return;
+            }
+            case NODE_TYPE_BROWSER: {
+                Element nodeElement = document.createElement(xmlNodeName);
+                String browserShowName;
                 try {
-                    browserShowName = mapper.getBrowserShowName(browserTableName, browserTableShowColumn, browserTableMainColumn, getValueMethod.invoke(object).toString());
+                    browserShowName = mapper.getBrowserShowName(browserTableName, browserTableShowColumn, browserTableMainColumn, getValueMethod.invoke(currentData).toString());
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
                 }
                 nodeElement.appendChild(document.createTextNode(browserShowName));
-                return null;
+                belongs.appendChild(nodeElement);
+                return;
+            }
         }
         throw new IllegalArgumentException("未知的xml节点类型");
     }
