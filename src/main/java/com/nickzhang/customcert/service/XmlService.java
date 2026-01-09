@@ -1,5 +1,6 @@
 package com.nickzhang.customcert.service;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.mapper.Mapper;
 import com.nickzhang.customcert.annotation.Table;
 import com.nickzhang.customcert.annotation.TableMapper;
@@ -11,10 +12,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author: 张骏山
@@ -25,6 +23,7 @@ import java.util.Map;
  * @Version: 1.0
  */
 @Service
+@DS("pojo")
 public class XmlService  implements InitializingBean {
 
     private final org.slf4j.Logger log = LoggerFactory.getLogger(XmlService.class);
@@ -46,7 +45,10 @@ public class XmlService  implements InitializingBean {
         Map<String, Object> mappers = applicationContext.getBeansWithAnnotation(TableMapper.class);
         HashMap<String, List<Class<?>>> pojoListMap = new HashMap<>();
         mappers.forEach((key, value) -> {
-            String pojoClassName = value.getClass().getAnnotation(TableMapper.class).value();
+            Class<?>[] interfaces = value.getClass().getInterfaces();
+            Class<?> mapperClass = Arrays.stream(interfaces).filter(inter -> inter.isAnnotationPresent(TableMapper.class)).findFirst().get();
+            TableMapper tableMapper = mapperClass.getAnnotation(TableMapper.class);
+            String pojoClassName = tableMapper.value();
             mapperList.put(pojoClassName, (Mapper<?>) value);
             Class<?> poJoClass;
             try {

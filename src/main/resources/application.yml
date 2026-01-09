@@ -1,16 +1,21 @@
 spring:
   datasource:
     dynamic:
-      primary: master
-      enable: true
-      strict: false
-      master:
-        url: jdbc:sqlserver://localhost:1433;databaseName=customcert;encrypt=true;trustServerCertificate=true
-        username: sa
-        password: 123456
-        driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-      pojo:
-        url: jdbc:sqlserver://localhost:1433;databaseName=RJECIQ;encrypt=true;trustServerCertificate=true
-        username: sa
-        password: 123456
-        driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      primary: master # 显式指定主数据源为 master（与下方数据源名称匹配）
+      strict: false # 关闭严格模式，允许未匹配到数据源时使用主数据源（默认 false，可选保留）
+      datasource:
+        master:
+          url: jdbc:sqlserver://localhost:1433;databaseName=customcert;trustServerCertificate=true
+          username: zjs
+          password: 1
+          driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver # 驼峰命名，更规范
+        pojo:
+          url: jdbc:sqlserver://localhost:1433;databaseName=RJECIQ;trustServerCertificate=true
+          username: zjs
+          password: 1
+          driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver # 驼峰命名，更规范
+
+
+logging:
+  level:
+    com.baomidou.dynamic.datasource: DEBUG # 打印动态数据源核心日志
