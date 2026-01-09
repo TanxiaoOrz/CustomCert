@@ -1,6 +1,7 @@
 package com.nickzhang.customcert.dto;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nickzhang.customcert.annotation.Column;
 import com.nickzhang.customcert.annotation.Table;
 import com.nickzhang.customcert.mapper.UtilsMapper;
@@ -69,6 +70,9 @@ public class XmlProducer {
         this.operType = operType;
     }
 
+    /**
+     * 无参构造函数
+     */
     public XmlProducer() {
         this.xmlRootAttributes = new HashMap<>();
         this.xmlProperties = new HashMap<>();
@@ -100,7 +104,7 @@ public class XmlProducer {
         Table mainTable = tableClass.getAnnotation(Table.class);
         xmlRootName = mainTable.xmlName();
         xmlDataGetter = new XmlDataGetter<>(tableClass.getName());
-        Arrays.stream(tableClass.getDeclaredFields()).forEach(field -> translateNode(tableClass, field));
+        Arrays.stream(tableClass.getDeclaredFields()).forEach(field -> translateNode(tableClass, field, children, childNodeCache));
 
 
         List<Class<?>> detailClasses = subClasses.get(tableClass.getName());
@@ -114,16 +118,17 @@ public class XmlProducer {
         return this;
     }
 
-    private void translateTable(Class<?> table, HashMap<String, List<Class<?>>> subClasses, XmlDataGetter<?> xmlDataGetter) {
+    private void translateTable(Class<?> tableClass, HashMap<String, List<Class<?>>> subClasses, XmlDataGetter<?> xmlDataGetter) {
         // 处理明细表主数组节点
-        String detailXmlPath = table.getAnnotation(Table.class).xmlName();
+        Table table = tableClass.getAnnotation(Table.class);
+        String detailXmlPath = table.xmlName();
         String[] detailXmlPathSegments = detailXmlPath.split(XNL_SEPARATOR);
-        XmlProducerNode detailNode = new XmlProducerNode(detailXmlPathSegments[detailXmlPathSegments.length - 1], new ArrayList<>(), table.getName());
+        XmlProducerNode detailNode = new XmlProducerNode(detailXmlPathSegments[detailXmlPathSegments.length - 1], new ArrayList<>(), tableClass.getName());
         NodeUtils.addChild(detailNode, detailXmlPathSegments, children, childNodeCache);
         // 处理明细表子节点
-        List<Field> fields = Arrays.asList(table.getDeclaredFields());
-        fields.forEach(field -> translateNode(table, field));
-        List<Class<?>> detailClasses = subClasses.get(table.getName());
+        List<Field> fields = Arrays.asList(tableClass.getDeclaredFields());
+        fields.forEach(field -> translateNode(tableClass, field, detailNode.getChildren(), detailNode.getCache()));
+        List<Class<?>> detailClasses = subClasses.get(tableClass.getName());
         // 构造数据获取器
         AtomicReference<Method> mainIdGetterMethod = new AtomicReference<>();
         AtomicReference<String> mainIdFieldName = new AtomicReference<>();
@@ -135,23 +140,23 @@ public class XmlProducer {
                     return annotation.joinKey();
                 }).findFirst().ifPresentOrElse(
                         field -> {
-                            mainIdGetterMethod.set(NodeUtils.getGetterMethod(table, field));
-                            mainIdFieldName.set(field.getAnnotation(Column.class).joinColumn());
+                            mainIdGetterMethod.set(NodeUtils.getGetterMethod(table.belongTo(), field.getAnnotation(Column.class).joinColumn()));
+                            mainIdFieldName.set(field.getAnnotation(Column.class).dbName());
                         },
-                        () -> {throw new RuntimeException("明细表" + table.getName() + "无链接主键字段");}
+                        () -> {throw new RuntimeException("明细表" + tableClass.getName() + "无链接主键字段");}
                 );
 
 
         // 处理明细表子数组节点
-        XmlDataGetter<?> detailXmlDataGetter = new XmlDataGetter<>(table.getName(), mainIdFieldName.get(), mainIdGetterMethod.get());
-        xmlDataGetter.putChildGetter(table.getName(), detailXmlDataGetter);
+        XmlDataGetter<?> detailXmlDataGetter = new XmlDataGetter<>(tableClass.getName(), mainIdFieldName.get(), mainIdGetterMethod.get());
+        xmlDataGetter.putChildGetter(tableClass.getName(), detailXmlDataGetter);
         if (detailClasses != null) {
             detailClasses.forEach(detailClass -> translateTable(detailClass, subClasses, detailXmlDataGetter));
         }
 
     }
 
-    private void translateNode(Class<?> tableClass, Field field) {
+    private void translateNode(Class<?> tableClass, Field field,List<XmlProducerNode> children, HashMap<String, XmlProducerNode> childNodeCache) {
         Column column = field.getAnnotation(Column.class);
         if (column != null) {
             String xmlName = column.xmlName();
@@ -185,6 +190,10 @@ public class XmlProducer {
         return node;
     }
 
+    public XmlData getXmlData(Map<String, BaseMapper<?>> mappers, String mainId) {
+        return xmlDataGetter.getMainData(mappers, mainId);
+    }
+
     public String getXmlText(XmlData xmlData, UtilsMapper utilsMapper) {
         Document document = builder.newDocument(); /* 生成xml文档 */
         Element rootElement = document.createElement(xmlRootName); /* 生成xml根节点 */
@@ -214,5 +223,16 @@ public class XmlProducer {
 
         return writer.toString();
     }
+
+        @Override
+        public String toString() {
+            return "XmlProducer{" +
+                    "xmlRootName='" + xmlRootName + '\'' + "\n" +
+                    ", xmlRootAttributes=" + xmlRootAttributes + "\n" +
+                    ", children=" + children.toString() + "\n" +
+                    ", xmlProperties=" + xmlProperties + "\n" +
+                    ", operType='" + operType + '\'' + "\n" +
+                    '}';
+        }
 
 }

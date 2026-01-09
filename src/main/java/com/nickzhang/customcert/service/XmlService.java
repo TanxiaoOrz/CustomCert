@@ -1,10 +1,12 @@
 package com.nickzhang.customcert.service;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
-import com.baomidou.mybatisplus.core.mapper.Mapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nickzhang.customcert.annotation.Table;
 import com.nickzhang.customcert.annotation.TableMapper;
+import com.nickzhang.customcert.dto.XmlData;
 import com.nickzhang.customcert.dto.XmlProducer;
+import com.nickzhang.customcert.mapper.UtilsMapper;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.slf4j.LoggerFactory;
@@ -23,22 +25,46 @@ import java.util.*;
  * @Version: 1.0
  */
 @Service
-@DS("pojo")
 public class XmlService  implements InitializingBean {
 
     private final org.slf4j.Logger log = LoggerFactory.getLogger(XmlService.class);
 
     private static final String BASE_POJO_PACKAGE = "com.nickzhang.customcert.pojo";
 
-    private final HashMap<String, Mapper<?>> mapperList = new HashMap<>();
+    private final HashMap<String, BaseMapper<?>> mapperList = new HashMap<>();
     private final HashMap<String, PoJoEntry> mainPoJoEntryMap = new HashMap<>();
 
-
+    /**
+     * 应用上下文
+     */
     private final ApplicationContext applicationContext;
 
-    public XmlService(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+     /**
+      * 工具mapper
+      */
+    private final UtilsMapper utilsMapper;
+
+    @DS("pojo")
+    public String generateXmlText(String showName, String mainId) {
+        log.info("start generate xml, showName: {}, mainId: {}", showName, mainId);
+        PoJoEntry poJoEntry = mainPoJoEntryMap.get(showName);
+        if (poJoEntry == null) {
+            throw new IllegalArgumentException("未找到对应的主POJO类：" + showName);
+        }
+        XmlProducer xmlProducer = poJoEntry.getXmlProducer();
+        XmlData xmlData = xmlProducer.getXmlData(mapperList, mainId);
+        log.info("xmlData: {}", xmlData);
+        String xmlText = xmlProducer.getXmlText(xmlData, utilsMapper);
+        log.info("xmlText: {}", xmlText);
+        return xmlText;
     }
+
+
+    public XmlService(ApplicationContext applicationContext, UtilsMapper utilsMapper) {
+        this.applicationContext = applicationContext;
+        this.utilsMapper = utilsMapper;
+    }
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public void afterPropertiesSet() {
         log.info("开始初始化XmlService");
@@ -49,7 +75,7 @@ public class XmlService  implements InitializingBean {
             Class<?> mapperClass = Arrays.stream(interfaces).filter(inter -> inter.isAnnotationPresent(TableMapper.class)).findFirst().get();
             TableMapper tableMapper = mapperClass.getAnnotation(TableMapper.class);
             String pojoClassName = tableMapper.value();
-            mapperList.put(pojoClassName, (Mapper<?>) value);
+            mapperList.put(BASE_POJO_PACKAGE + "." + pojoClassName,   (BaseMapper<?>)  value);
             Class<?> poJoClass;
             try {
                 poJoClass = Class.forName(BASE_POJO_PACKAGE + "." + pojoClassName);
@@ -76,6 +102,14 @@ public class XmlService  implements InitializingBean {
         log.info("已初始化所有构造器");
         log.info("XmlService初始化完成");
     }
+
+    @Override
+    public String toString() {
+        return "XmlService{" +
+                "mapperList=" + mapperList.toString() + "\n" +
+                ", mainPoJoEntryMap=" + mainPoJoEntryMap.toString() + "\n" +
+                '}';
+    }
 }
 
 @Data
@@ -84,4 +118,12 @@ class PoJoEntry {
     Class<?> poJoClass;
     XmlProducer xmlProducer;
     Table table;
+
+    @Override
+    public String toString() {
+        return "PoJoEntry{" +
+                "poJoClass=" + poJoClass + "\n" +
+                ", xmlProducer=" + xmlProducer + "\n" +
+                '}';
+    }
 }

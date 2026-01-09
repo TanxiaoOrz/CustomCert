@@ -53,6 +53,7 @@ public class XmlProducerNode {
     /**
      * 子节点初始化时的缓存，用于快速查找子节点
      */
+    @Getter
     private HashMap<String, XmlProducerNode> cache;
 
     private final Method getValueMethod;
@@ -162,36 +163,39 @@ public class XmlProducerNode {
     protected void appendChildren(XmlData xmlData, UtilsMapper mapper, Document document, Element belongs) {
         Object currentData = xmlData.getCurrentData();
         switch (xmlNodeType) {
-            case NODE_TYPE_TEXT: {
+            case NODE_TYPE_TEXT -> {
                 Element nodeElement = document.createElement(xmlNodeName);
                 String textValue;
                 try {
-                    textValue = (String) getValueMethod.invoke(currentData);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new RuntimeException(e);
+                    String invoke = (String) getValueMethod.invoke(currentData);
+                    textValue = invoke==null?"":invoke;
+                } catch (IllegalAccessException | InvocationTargetException |IllegalArgumentException e) {
+                    throw new RuntimeException("获取" + xmlNodeName + "节点值时出错"+getValueMethod.getName()+" "+currentData.getClass(), e);
                 }
-                nodeElement.appendChild(document.createTextNode(textValue));
+                nodeElement.appendChild(document.createTextNode(textValue.equals("")?"":textValue));
                 belongs.appendChild(nodeElement);
                 return;
             }
-            case NODE_TYPE_ELEMENT: {
+            case NODE_TYPE_ELEMENT -> {
                 Element nodeElement = document.createElement(xmlNodeName);
                 children.forEach(child -> child.appendChildren(xmlData, mapper, document, nodeElement));
                 belongs.appendChild(nodeElement);
                 return;
             }
-            case NODE_TYPE_ELEMENT_LIST: {
+            case NODE_TYPE_ELEMENT_LIST -> {
                 List<XmlData> xmlDataChildren = xmlData.getChildren(elementsClassName);
+                if (xmlDataChildren == null)
+                    return;
                 xmlDataChildren.forEach(data -> {
                     Element nodeElement = document.createElement(xmlNodeName);
                     children.forEach(child ->
-                        child.appendChildren(data, mapper, document, nodeElement)
+                            child.appendChildren(data, mapper, document, nodeElement)
                     );
                     belongs.appendChild(nodeElement);
                 });
                 return;
             }
-            case NODE_TYPE_BROWSER: {
+            case NODE_TYPE_BROWSER -> {
                 Element nodeElement = document.createElement(xmlNodeName);
                 String browserShowName;
                 try {
@@ -207,5 +211,16 @@ public class XmlProducerNode {
         throw new IllegalArgumentException("未知的xml节点类型");
     }
 
-
+        @Override
+        public String toString() {
+            return "XmlProducerNode{" +"\n" +
+                    "xmlNodeName='" + xmlNodeName + '\'' + "\n" +
+                    ", xmlNodeType=" + xmlNodeType + "\n" +
+                    ", getValueMethod=" + getValueMethod + "\n" +
+                    ", browserTableName='" + browserTableName + '\'' + "\n" +
+                    ", browserTableMainColumn='" + browserTableMainColumn + '\'' + "\n" +
+                    ", browserTableShowColumn='" + browserTableShowColumn + '\'' +
+                    ", children=" + children +"\n" +
+                    '}';
+        }
 }

@@ -1,6 +1,7 @@
 package com.nickzhang.customcert.utils;
 
 import com.nickzhang.customcert.dto.XmlProducerNode;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -36,11 +37,18 @@ public class NodeUtils {
         }
 
         String fieldName = field.getName();
-        Class<?> fieldType = field.getType();
-        String methodName;
 
-        // 1. 拼接方法名（区分布尔类型和普通类型）
-        if (fieldType == boolean.class || fieldType == Boolean.class) {
+        return getGetterMethod(clazz, fieldName);
+    }
+
+    /**
+     * 根据字段名获取对应的 get/is 方法
+     * @param clazz 字段所属的类
+     * @param fieldName 目标字段名
+     * @return 对应的 get/is 方法（无则返回 null）
+     */
+    public static Method getGetterMethod(Class<?> clazz, String fieldName) {
+        String methodName;
             // 布尔类型优先拼接 isXXX，兼容 getXXX
             methodName = "is" + capitalizeFirstLetter(fieldName);
             Method method;
@@ -56,17 +64,6 @@ public class NodeUtils {
                 }
             }
             return method;
-        } else {
-            // 文本类型优先拼接 getXXX
-            methodName = "get" + capitalizeFirstLetter(fieldName);
-            Method getMethod;
-            try {
-                getMethod = clazz.getMethod(methodName);
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException("xml生成解析器失败,类 " + clazz.getName() + " 中不存在方法 " + methodName, e);
-            }
-            return getMethod;
-        }
     }
 
     /**

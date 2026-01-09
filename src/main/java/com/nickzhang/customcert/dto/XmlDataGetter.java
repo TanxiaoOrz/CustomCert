@@ -59,7 +59,13 @@ public class XmlDataGetter<P> {
         childGetters.put(getterName, xmlDataGetter);
     }
 
-    public XmlData getData(Map<String, BaseMapper<?>> mappers, String mainId) {
+    /**
+     * 获取主节点数据
+     * @param mappers 所有mapper
+     * @param mainId 主节点id
+     * @return 主节点数据
+     */
+    public XmlData getMainData(Map<String, BaseMapper<?>> mappers, String mainId) {
         if (mainTableColumn != null) {
             throw new RuntimeException("明细节点不得直接调用");
         }
@@ -94,14 +100,14 @@ public class XmlDataGetter<P> {
         List<P> ps;
         try {
             ps = mapper.selectList(new QueryWrapper<P>().eq(mainTableColumn, getMainIdMethod.invoke(belongTo)));
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("调用子节点索引,抓换父节点id" + getMainIdMethod.getName() + "时出错", e);
+        } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+            throw new RuntimeException("当前节点 " + currentGetterName + " 调用子节点索引,抓换父节点id: method=>" + getMainIdMethod.getName() + ",belongTo=>" + belongTo.getClass().getName() + "时出错", e);
         }
         return ps.stream().map(p -> {
             XmlData xmlData = new XmlData(p);
             childGetters.values().forEach(
                     childGetter -> {
-                            xmlData.putChildren(childGetter.currentGetterName, childGetter.getDetailData(mappers, childGetter));
+                            xmlData.putChildren(childGetter.currentGetterName, childGetter.getDetailData(mappers, p));
                     }
             );
             return xmlData;

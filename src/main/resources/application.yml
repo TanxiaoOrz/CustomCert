@@ -14,8 +14,3 @@ spring:
           username: zjs
           password: 1
           driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver # 驼峰命名，更规范
-
-
-logging:
-  level:
-    com.baomidou.dynamic.datasource: DEBUG # 打印动态数据源核心日志
