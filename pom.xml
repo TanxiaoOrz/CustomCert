@@ -113,6 +113,11 @@
 			<version>RELEASE</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.dom4j</groupId>
+			<artifactId>dom4j</artifactId>
+			<version>2.1.4</version> <!-- 稳定推荐版本，兼容 JDK 8+，无安全漏洞 -->
+		</dependency>
 	</dependencies>
 
 	<build>

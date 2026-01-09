@@ -6,15 +6,11 @@ import com.nickzhang.customcert.annotation.Column;
 import com.nickzhang.customcert.annotation.Table;
 import com.nickzhang.customcert.mapper.UtilsMapper;
 import com.nickzhang.customcert.utils.NodeUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 
 import java.io.StringWriter;
 import java.lang.reflect.Field;
@@ -30,7 +26,7 @@ import static com.nickzhang.customcert.annotation.Column.XNL_SEPARATOR;
  * @Date: 2026/1/6 13:09
  * @PackageName: com.nickzhang.customcert.dto
  * @ClassName: XmlProducer
- * @Description: xml文件生产类
+ * @Description: xml文件生产类（基于 dom4j 实现）
  * @Version: 1.0
  */
 public class XmlProducer {
@@ -48,7 +44,7 @@ public class XmlProducer {
      */
     private final HashMap<String, String> xmlRootAttributes;
     /**
-     * xml 文件属性
+     * xml 文件属性（dom4j 格式化配置，替代原 Transformer 配置）
      */
     private final HashMap<String, String> xmlProperties;
 
@@ -61,8 +57,8 @@ public class XmlProducer {
 
     private final String operType;
 
-    private TransformerFactory factory;
-    private DocumentBuilder builder;
+    // 替换：移除 org.w3c.dom 的构建器/转换器，使用 dom4j 的格式化配置
+    private OutputFormat outputFormat;
 
     public XmlProducer(HashMap<String, String> xmlRootAttributes, HashMap<String, String> xmlProperties, String operType) {
         this.xmlRootAttributes = xmlRootAttributes;
@@ -80,9 +76,10 @@ public class XmlProducer {
         xmlRootAttributes.put("xmlns:ds", "http://www.chinaport.gov.cn/ciq");
         xmlRootAttributes.put("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
-        xmlProperties.put(OutputKeys.INDENT, "yes");
-        xmlProperties.put(OutputKeys.ENCODING, "UTF-8");
-        xmlProperties.put(OutputKeys.VERSION, "1.0");
+        // 替换：dom4j 格式化配置（对应原 Transformer 输出属性）
+        xmlProperties.put("INDENT", "yes");
+        xmlProperties.put("ENCODING", "UTF-8");
+        xmlProperties.put("VERSION", "1.0");
 
         operType = "G";
     }
@@ -95,27 +92,54 @@ public class XmlProducer {
      * @return 当前xml文件生产类实例
      */
     public XmlProducer initialize(Class<?> tableClass, HashMap<String, List<Class<?>>> subClasses) {
-        try {
-            builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            factory = TransformerFactory.newInstance();
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException("初始化xml文档构建器失败", e);
-        }
+        // 替换：初始化 dom4j 输出格式（无需 ParserConfigurationException 捕获）
+        initDom4jOutputFormat();
+
         Table mainTable = tableClass.getAnnotation(Table.class);
         xmlRootName = mainTable.xmlName();
         xmlDataGetter = new XmlDataGetter<>(tableClass.getName());
         Arrays.stream(tableClass.getDeclaredFields()).forEach(field -> translateNode(tableClass, field, children, childNodeCache));
 
-
         List<Class<?>> detailClasses = subClasses.get(tableClass.getName());
-
-        detailClasses.forEach(detailClass -> translateTable(detailClass, subClasses, xmlDataGetter));
+        if (detailClasses != null) {
+            detailClasses.forEach(detailClass -> translateTable(detailClass, subClasses, xmlDataGetter));
+        }
 
         // 清理缓存
         childNodeCache = null;
         children.forEach(XmlProducerNode::clearCache);
 
         return this;
+    }
+
+    /**
+     * 初始化 dom4j 输出格式（核心：配置 XML 序列化规则）
+     */
+    private void initDom4jOutputFormat() {
+        // 1. 创建格式化对象（美观格式化/紧凑格式化二选一）
+        outputFormat = OutputFormat.createPrettyPrint(); // 带缩进、换行的美观格式
+        // outputFormat = OutputFormat.createCompactFormat(); // 无缩进、无换行的紧凑格式
+
+        // 2. 从 xmlProperties 加载配置（对应原 Transformer 输出属性）
+        if (xmlProperties != null) {
+            // 编码配置
+            String encoding = xmlProperties.get("ENCODING");
+            if (encoding != null && !encoding.isEmpty()) {
+                outputFormat.setEncoding(encoding);
+            } else {
+                outputFormat.setEncoding("UTF-8"); // 默认 UTF-8
+            }
+
+            // 缩进配置（仅对 PrettyPrint 生效）
+            if ("yes".equalsIgnoreCase(xmlProperties.get("INDENT"))) {
+                outputFormat.setIndent(true);
+                outputFormat.setIndent("  "); // 缩进 2 个空格
+                outputFormat.setNewlines(true); // 开启换行
+            }
+
+            // 可选：强制空节点展开为 <tag></tag>（避免自闭合标签 <tag/>）
+            outputFormat.setExpandEmptyElements(true);
+        }
     }
 
     private void translateTable(Class<?> tableClass, HashMap<String, List<Class<?>>> subClasses, XmlDataGetter<?> xmlDataGetter) {
@@ -133,19 +157,18 @@ public class XmlProducer {
         AtomicReference<Method> mainIdGetterMethod = new AtomicReference<>();
         AtomicReference<String> mainIdFieldName = new AtomicReference<>();
         fields.stream().filter(field -> {
-                    Column annotation = (field).getAnnotation(Column.class);
-                    if (annotation == null) {
-                        return false;
-                    }
-                    return annotation.joinKey();
-                }).findFirst().ifPresentOrElse(
-                        field -> {
-                            mainIdGetterMethod.set(NodeUtils.getGetterMethod(table.belongTo(), field.getAnnotation(Column.class).joinColumn()));
-                            mainIdFieldName.set(field.getAnnotation(Column.class).dbName());
-                        },
-                        () -> {throw new RuntimeException("明细表" + tableClass.getName() + "无链接主键字段");}
-                );
-
+            Column annotation = (field).getAnnotation(Column.class);
+            if (annotation == null) {
+                return false;
+            }
+            return annotation.joinKey();
+        }).findFirst().ifPresentOrElse(
+                field -> {
+                    mainIdGetterMethod.set(NodeUtils.getGetterMethod(table.belongTo(), field.getAnnotation(Column.class).joinColumn()));
+                    mainIdFieldName.set(field.getAnnotation(Column.class).dbName());
+                },
+                () -> {throw new RuntimeException("明细表" + tableClass.getName() + "无链接主键字段");}
+        );
 
         // 处理明细表子数组节点
         XmlDataGetter<?> detailXmlDataGetter = new XmlDataGetter<>(tableClass.getName(), mainIdFieldName.get(), mainIdGetterMethod.get());
@@ -153,10 +176,9 @@ public class XmlProducer {
         if (detailClasses != null) {
             detailClasses.forEach(detailClass -> translateTable(detailClass, subClasses, detailXmlDataGetter));
         }
-
     }
 
-    private void translateNode(Class<?> tableClass, Field field,List<XmlProducerNode> children, HashMap<String, XmlProducerNode> childNodeCache) {
+    private void translateNode(Class<?> tableClass, Field field, List<XmlProducerNode> children, HashMap<String, XmlProducerNode> childNodeCache) {
         Column column = field.getAnnotation(Column.class);
         if (column != null) {
             String xmlName = column.xmlName();
@@ -194,45 +216,43 @@ public class XmlProducer {
         return xmlDataGetter.getMainData(mappers, mainId);
     }
 
+    /**
+     * 核心替换：使用 dom4j 生成 XML 字符串（替代 org.w3c.dom 的 Transformer 逻辑）
+     */
     public String getXmlText(XmlData xmlData, UtilsMapper utilsMapper) {
-        Document document = builder.newDocument(); /* 生成xml文档 */
-        Element rootElement = document.createElement(xmlRootName); /* 生成xml根节点 */
-        xmlRootAttributes.forEach(rootElement::setAttribute); /* 为xml根节点添加属性 */
-        document.appendChild(rootElement);
-        children.forEach(node -> node.appendChildren(xmlData, utilsMapper, document, rootElement)); /* 为xml根节点添加子节点 */
-        rootElement.appendChild(document.createElement("OperType")).setTextContent(operType);
-        Transformer transformer;
-        try {
-            transformer = factory.newTransformer();
-        } catch (TransformerConfigurationException e) {
-            throw new RuntimeException("初始化xml文档转换失败", e);
-        }
+        // 1. 构建 dom4j Document（替代 org.w3c.dom.Document）
+        Document document = DocumentHelper.createDocument();
 
-        xmlProperties.forEach(transformer::setOutputProperty); /* 为xml根节点添加属性 */
+        // 2. 创建根节点（替代 document.createElement + appendChild）
+        Element rootElement = document.addElement(xmlRootName);
 
+        // 3. 给根节点添加属性（方法名一致，逻辑不变）
+        xmlRootAttributes.forEach(rootElement::addAttribute);
 
-        DOMSource source = new DOMSource(document);
-        // 输出到文件
-        StringWriter writer = new StringWriter();
-        StreamResult result = new StreamResult(writer);
-        try {
-            transformer.transform(source, result);
-        } catch (TransformerException e) {
+        // 4. 追加子节点（需确保 XmlProducerNode.appendChildren 内部也适配 dom4j）
+        children.forEach(node -> node.appendChildren(xmlData, utilsMapper, document, rootElement));
+
+        // 5. 添加 OperType 节点（替换 setTextContent 为 setText）
+        rootElement.addElement("OperType").setText(operType);
+
+        // 6. dom4j 序列化 XML（替代 Transformer + DOMSource + StreamResult）
+        try (StringWriter writer = new StringWriter()) {
+            XMLWriter xmlWriter = new XMLWriter(writer, outputFormat);
+            xmlWriter.write(document);
+            return writer.toString();
+        } catch (Exception e) {
             throw new RuntimeException("xml文件生产失败", e);
         }
-
-        return writer.toString();
     }
 
-        @Override
-        public String toString() {
-            return "XmlProducer{" +
-                    "xmlRootName='" + xmlRootName + '\'' + "\n" +
-                    ", xmlRootAttributes=" + xmlRootAttributes + "\n" +
-                    ", children=" + children.toString() + "\n" +
-                    ", xmlProperties=" + xmlProperties + "\n" +
-                    ", operType='" + operType + '\'' + "\n" +
-                    '}';
-        }
-
+    @Override
+    public String toString() {
+        return "XmlProducer{" +
+                "xmlRootName='" + xmlRootName + '\'' + "\n" +
+                ", xmlRootAttributes=" + xmlRootAttributes + "\n" +
+                ", children=" + children.toString() + "\n" +
+                ", xmlProperties=" + xmlProperties + "\n" +
+                ", operType='" + operType + '\'' + "\n" +
+                '}';
+    }
 }
