@@ -3,7 +3,6 @@ package com.nickzhang.customcert.dto;
 import com.nickzhang.customcert.mapper.UtilsMapper;
 import com.nickzhang.customcert.utils.NodeUtils;
 import lombok.Getter;
-import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.jetbrains.annotations.NotNull;
@@ -46,6 +45,7 @@ public class XmlProducerNode {
     @Getter
     private final int xmlNodeType;
 
+
     /**
      * 子节点列表
      */
@@ -59,7 +59,10 @@ public class XmlProducerNode {
 
     private final Method getValueMethod;
 
-    private String elementsClassName;
+    /**
+     * 数据获取对象全限定名
+     */
+    private String objectClassName;
 
     private String browserTableName;
     private String browserTableMainColumn;
@@ -82,6 +85,9 @@ public class XmlProducerNode {
         }
     }
 
+
+
+
     /**
      * 元素列表节点构造函数 默认赋值NODE_TYPE_ELEMENT_LIST
      *
@@ -98,7 +104,7 @@ public class XmlProducerNode {
         for (XmlProducerNode child : children) {
             cache.put(child.xmlNodeName, child);
         }
-        this.elementsClassName = elementsClassName;
+        this.objectClassName = elementsClassName;
     }
 
     /**
@@ -164,70 +170,98 @@ public class XmlProducerNode {
      *
      * @param xmlData  xml数据对象
      * @param mapper   数据库映射器
-     * @param document xml文档对象（dom4j 类型）
      * @param belongs  父节点元素（dom4j 类型）
      */
-    protected void appendChildren(XmlData xmlData, UtilsMapper mapper, Document document, Element belongs) {
+    protected void appendChildren(XmlData xmlData, UtilsMapper mapper, Element belongs) {
         Object currentData = xmlData.getCurrentData();
-        switch (xmlNodeType) {
-            case NODE_TYPE_TEXT -> {
-                // 1. 替换：dom4j 创建元素节点
-                Element nodeElement = DocumentHelper.createElement(xmlNodeName);
-                String textValue;
-                try {
-                    String invoke = (String) getValueMethod.invoke(currentData);
-                    textValue = invoke == null ? "" : invoke;
-                } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
-                    throw new RuntimeException("获取" + xmlNodeName + "节点值时出错" + getValueMethod.getName() + " " + currentData.getClass(), e);
-                }
-                // 2. 替换：无需创建文本节点，直接用 setText() 赋值（自动处理空字符串）
-                nodeElement.setText(textValue);
-                // 3. 替换：dom4j 追加子节点到父节点
-                belongs.add(nodeElement);
+        // NODE_TYPE_ELEMENT_LIST 元素列表节点 一定需要处理调整数据来源
+        if (NODE_TYPE_ELEMENT_LIST == xmlNodeType) {
+            List<XmlData> xmlDataChildren = xmlData.getChildren(objectClassName);
+            if (xmlDataChildren == null)
                 return;
-            }
-            case NODE_TYPE_ELEMENT -> {
+            xmlDataChildren.forEach(data -> {
                 // 1. 替换：dom4j 创建元素节点
                 Element nodeElement = DocumentHelper.createElement(xmlNodeName);
                 // 2. 递归处理子节点（参数已适配 dom4j 类型）
-                children.forEach(child -> child.appendChildren(xmlData, mapper, document, nodeElement));
+                List<XmlProducerNode> dataChildren = children;
+                dataChildren.forEach(child ->
+                        child.appendChildren(data, mapper, nodeElement)
+                );
                 // 3. 替换：dom4j 追加子节点到父节点
                 belongs.add(nodeElement);
-                return;
-            }
-            case NODE_TYPE_ELEMENT_LIST -> {
-                List<XmlData> xmlDataChildren = xmlData.getChildren(elementsClassName);
-                if (xmlDataChildren == null)
+            });
+            return;
+        }
+
+        // 仅当 objectClassName 为空或与当前数据类名匹配时进行数据获取逻辑
+        if (objectClassName==null || objectClassName.isEmpty() || objectClassName.equals(currentData.getClass().getName())) {
+            switch (xmlNodeType) {
+                case NODE_TYPE_TEXT -> {
+                    // 1. 替换：dom4j 创建元素节点
+                    Element nodeElement = DocumentHelper.createElement(xmlNodeName);
+                    String textValue;
+                    try {
+                        String invoke = (String) getValueMethod.invoke(currentData);
+                        textValue = invoke == null ? "" : invoke;
+                    } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+                        throw new RuntimeException("获取" + xmlNodeName + "节点值时出错" + getValueMethod.getName() + " " + currentData.getClass(), e);
+                    }
+                    // 2. 替换：无需创建文本节点，直接用 setText() 赋值（自动处理空字符串）
+                    nodeElement.setText(textValue);
+                    // 3. 替换：dom4j 追加子节点到父节点
+                    belongs.add(nodeElement);
                     return;
-                xmlDataChildren.forEach(data -> {
+                }
+                case NODE_TYPE_ELEMENT -> {
                     // 1. 替换：dom4j 创建元素节点
                     Element nodeElement = DocumentHelper.createElement(xmlNodeName);
                     // 2. 递归处理子节点（参数已适配 dom4j 类型）
-                    children.forEach(child ->
-                            child.appendChildren(data, mapper, document, nodeElement)
-                    );
+                    children.forEach(child -> child.appendChildren(xmlData, mapper, nodeElement));
+                    // 3. 替换：dom4j 追加子节点到父节点
+                    if (!NodeUtils.isEmptyElement(nodeElement))
+                        belongs.add(nodeElement);
+                    return;
+                }
+                case NODE_TYPE_BROWSER -> {
+                    // 1. 替换：dom4j 创建元素节点
+                    Element nodeElement = DocumentHelper.createElement(xmlNodeName);
+                    String browserShowName;
+                    try {
+                        browserShowName = mapper.getBrowserShowName(browserTableName, browserTableShowColumn, browserTableMainColumn, getValueMethod.invoke(currentData).toString());
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
+                    // 2. 替换：直接用 setText() 赋值，无需手动创建文本节点
+                    nodeElement.setText(browserShowName == null ? "" : browserShowName);
                     // 3. 替换：dom4j 追加子节点到父节点
                     belongs.add(nodeElement);
-                });
-                return;
-            }
-            case NODE_TYPE_BROWSER -> {
-                // 1. 替换：dom4j 创建元素节点
-                Element nodeElement = DocumentHelper.createElement(xmlNodeName);
-                String browserShowName;
-                try {
-                    browserShowName = mapper.getBrowserShowName(browserTableName, browserTableShowColumn, browserTableMainColumn, getValueMethod.invoke(currentData).toString());
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new RuntimeException(e);
+                    return;
                 }
-                // 2. 替换：直接用 setText() 赋值，无需手动创建文本节点
-                nodeElement.setText(browserShowName);
-                // 3. 替换：dom4j 追加子节点到父节点
-                belongs.add(nodeElement);
+            }
+            throw new IllegalArgumentException("未知的xml节点类型");
+        } else {
+            // 数据源不匹配时,重新获取数据来源
+            // 重新获取数据来源
+            List<XmlData> xmlDataList = xmlData.getChildren(objectClassName);
+            if (xmlDataList == null || xmlDataList.isEmpty()) {// 数据源为空时,直接返回,
+                belongs.add(DocumentHelper.createElement(xmlNodeName));
                 return;
             }
+            XmlData actualXmlData = xmlDataList.get(0); // 获取实际数据源
+            this.appendChildren(actualXmlData, mapper, belongs);
         }
-        throw new IllegalArgumentException("未知的xml节点类型");
+
+    }
+
+    /**
+     * 非独立从表时字段元素,记录所属主表类名,产生值时特殊处理
+     * @param objectClassName 所属主表类名
+     */
+    protected XmlProducerNode tobeDependentBelongClass(String objectClassName) {
+        if (xmlNodeType == NODE_TYPE_ELEMENT_LIST)
+            return this;
+        this.objectClassName = objectClassName;
+        return this.tobeDependentBelongClass(objectClassName);
     }
 
     @Override

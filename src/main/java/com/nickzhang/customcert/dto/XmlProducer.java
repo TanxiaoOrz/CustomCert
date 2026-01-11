@@ -1,6 +1,5 @@
 package com.nickzhang.customcert.dto;
 
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nickzhang.customcert.annotation.Column;
 import com.nickzhang.customcert.annotation.Table;
@@ -43,6 +42,9 @@ public class XmlProducer {
      * xml 前缀根节点属性
      */
     private final HashMap<String, String> xmlRootAttributes;
+
+    private String schemaLocation;
+
     /**
      * xml 文件属性（dom4j 格式化配置，替代原 Transformer 配置）
      */
@@ -72,9 +74,11 @@ public class XmlProducer {
     public XmlProducer() {
         this.xmlRootAttributes = new HashMap<>();
         this.xmlProperties = new HashMap<>();
-        xmlRootAttributes.put("xsi:schemaLocation", "http://www.chinaport.gov.cn/ciq DecCiqMessage.xsd");
-        xmlRootAttributes.put("xmlns:ds", "http://www.chinaport.gov.cn/ciq");
-        xmlRootAttributes.put("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        schemaLocation = "http://www.chinaport.gov.cn/ciq DecCiqMessage.xsd";
+        xmlRootAttributes.put("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        xmlRootAttributes.put("", "http://www.chinaport.gov.cn/ciq");
+//        xmlRootAttributes.put("xmlns:", "http://www.chinaport.gov.cn/ciq");
+//        xmlRootAttributes.put("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
         // 替换：dom4j 格式化配置（对应原 Transformer 输出属性）
         xmlProperties.put("INDENT", "yes");
@@ -143,16 +147,27 @@ public class XmlProducer {
     }
 
     private void translateTable(Class<?> tableClass, HashMap<String, List<Class<?>>> subClasses, XmlDataGetter<?> xmlDataGetter) {
-        // 处理明细表主数组节点
+        // 处理子表主节点
         Table table = tableClass.getAnnotation(Table.class);
         String detailXmlPath = table.xmlName();
+        boolean isDependent = table.isDependent();
         String[] detailXmlPathSegments = detailXmlPath.split(XNL_SEPARATOR);
-        XmlProducerNode detailNode = new XmlProducerNode(detailXmlPathSegments[detailXmlPathSegments.length - 1], new ArrayList<>(), tableClass.getName());
-        NodeUtils.addChild(detailNode, detailXmlPathSegments, children, childNodeCache);
+        XmlProducerNode detailNode ;
+        if (isDependent)
+            detailNode = new XmlProducerNode(detailXmlPathSegments[detailXmlPathSegments.length - 1], new ArrayList<>()); // 非独立从表创建元素节点缓存,后续合并使用
+        else
+            detailNode = new XmlProducerNode(detailXmlPathSegments[detailXmlPathSegments.length - 1], new ArrayList<>(), tableClass.getName()); // 独立表创建数组节点(兼容单行)
+
         // 处理明细表子节点
         List<Field> fields = Arrays.asList(tableClass.getDeclaredFields());
-        fields.forEach(field -> translateNode(tableClass, field, detailNode.getChildren(), detailNode.getCache()));
+        fields.stream().map(field -> translateNode(tableClass, field, detailNode.getChildren(), detailNode.getCache())) // 生成子节点
+                .filter(Objects::nonNull).filter(nodes->isDependent).forEach(nodes->nodes.tobeDependentBelongClass(tableClass.getName())); // 若从属子表 注入类型名
         List<Class<?>> detailClasses = subClasses.get(tableClass.getName());
+
+        // 将子表节点进行添加
+        NodeUtils.addChild(detailNode, detailXmlPathSegments, children, childNodeCache);
+
+
         // 构造数据获取器
         AtomicReference<Method> mainIdGetterMethod = new AtomicReference<>();
         AtomicReference<String> mainIdFieldName = new AtomicReference<>();
@@ -178,15 +193,17 @@ public class XmlProducer {
         }
     }
 
-    private void translateNode(Class<?> tableClass, Field field, List<XmlProducerNode> children, HashMap<String, XmlProducerNode> childNodeCache) {
+    private XmlProducerNode translateNode(Class<?> tableClass, Field field, List<XmlProducerNode> children, HashMap<String, XmlProducerNode> childNodeCache) {
         Column column = field.getAnnotation(Column.class);
         if (column != null) {
             String xmlName = column.xmlName();
             if (xmlName != null && !xmlName.isEmpty()) {
                 XmlProducerNode node = getBaseNode(tableClass, field, column, xmlName);
                 NodeUtils.addChild(node, xmlName.split(XNL_SEPARATOR), children, childNodeCache);
+                return node;
             }
         }
+        return null;
     }
 
     private XmlProducerNode getBaseNode(Class<?> detailClass, Field field, Column column, String xmlName) {
@@ -226,20 +243,23 @@ public class XmlProducer {
         // 2. 创建根节点（替代 document.createElement + appendChild）
         Element rootElement = document.addElement(xmlRootName);
 
-        // 3. 给根节点添加属性（方法名一致，逻辑不变）
-        xmlRootAttributes.forEach(rootElement::addAttribute);
 
         // 4. 追加子节点（需确保 XmlProducerNode.appendChildren 内部也适配 dom4j）
-        children.forEach(node -> node.appendChildren(xmlData, utilsMapper, document, rootElement));
+        children.forEach(node -> node.appendChildren(xmlData, utilsMapper, rootElement));
 
         // 5. 添加 OperType 节点（替换 setTextContent 为 setText）
         rootElement.addElement("OperType").setText(operType);
+
+        // 3. 给根节点添加属性（方法名一致，逻辑不变）
+        xmlRootAttributes.entrySet().stream().map(entry -> DocumentHelper.createNamespace(entry.getKey(), entry.getValue())).forEach(rootElement::add);
+//        xmlRootAttributes.forEach(rootElement::addAttribute);
+        rootElement.addAttribute("xsi:schemaLocation", schemaLocation);
 
         // 6. dom4j 序列化 XML（替代 Transformer + DOMSource + StreamResult）
         try (StringWriter writer = new StringWriter()) {
             XMLWriter xmlWriter = new XMLWriter(writer, outputFormat);
             xmlWriter.write(document);
-            return writer.toString();
+            return writer.toString().replace(" xmlns=\"\"", "");
         } catch (Exception e) {
             throw new RuntimeException("xml文件生产失败", e);
         }

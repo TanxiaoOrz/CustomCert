@@ -1,14 +1,15 @@
 package com.nickzhang.customcert.utils;
 
 import com.nickzhang.customcert.dto.XmlProducerNode;
-import org.jetbrains.annotations.NotNull;
-
+import org.dom4j.Element;
+import org.dom4j.Attribute;
+import java.util.List;
+import java.util.regex.Pattern;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 import static com.nickzhang.customcert.annotation.Column.XNL_SEPARATOR;
 
@@ -154,5 +155,52 @@ public class NodeUtils {
             }
             xmlProducerNode.addChild(child, Arrays.copyOfRange(xmlNodeNames, 1, xmlNodeNames.length));
         }
+    }
+
+    /**
+     * 判断单个 dom4j.Element 是否为空节点（无有效文本、无有效属性、无有效子元素）
+     * @param element 待判断的 DOM4J 元素节点
+     * @return true：空节点，false：有效非空节点
+     */
+    public static boolean isEmptyElement(Element element) {
+        if (element == null) {
+            return true;
+        }
+
+        // 定义正则：匹配空白字符（空格、制表符、换行符等，首尾不限）
+        Pattern blankPattern = Pattern.compile("^\\s*$");
+
+        // 场景1：判断元素自身的文本内容是否有效（去除空白后非空）
+        String textContent = element.getTextTrim(); // DOM4J 专属方法，直接去除首尾空白
+        String originalText = element.getText();
+        boolean hasValidText = originalText != null && !(Pattern.matches("^\\s*$", originalText));
+        // 补充：getTextTrim() 直接返回去除空白后的字符串，更简洁的判断方式
+        if (!textContent.isEmpty()) {
+            hasValidText = true;
+        }
+
+        // 场景2：判断元素是否有有效属性（属性值非空白）
+        List<Attribute> attributes = element.attributes();
+        boolean hasValidAttribute = false;
+        for (Attribute attr : attributes) {
+            String attrValue = attr.getValue();
+            if (attrValue != null && !Pattern.matches("^\\s*$", attrValue)) {
+                hasValidAttribute = true;
+                break;
+            }
+        }
+
+        // 场景3：判断元素是否有有效子元素（递归判断，处理嵌套子节点）
+        List<Element> childElements = element.elements(); // DOM4J 专属方法，获取所有子元素节点
+        boolean hasValidChildElement = false;
+        for (Element childElem : childElements) {
+            if (!isEmptyElement(childElem)) { // 递归调用，判断子元素是否非空
+                hasValidChildElement = true;
+                break;
+            }
+        }
+
+        // 无任何有效内容，视为空节点
+        return !hasValidText && !hasValidAttribute && !hasValidChildElement;
     }
 }

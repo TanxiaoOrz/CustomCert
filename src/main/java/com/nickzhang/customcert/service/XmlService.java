@@ -9,6 +9,7 @@ import com.nickzhang.customcert.dto.XmlProducer;
 import com.nickzhang.customcert.mapper.UtilsMapper;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.dom4j.DocumentHelper;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -53,9 +54,9 @@ public class XmlService  implements InitializingBean {
         }
         XmlProducer xmlProducer = poJoEntry.getXmlProducer();
         XmlData xmlData = xmlProducer.getXmlData(mapperList, mainId);
-        log.info("xmlData: {}", xmlData);
+        log.info("xmlData:\n {}", xmlData);
         String xmlText = xmlProducer.getXmlText(xmlData, utilsMapper);
-        log.info("xmlText: {}", xmlText);
+        log.info("xmlText:\n {}", xmlText);
         return xmlText;
     }
 
