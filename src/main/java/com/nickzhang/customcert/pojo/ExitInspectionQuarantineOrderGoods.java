@@ -21,7 +21,6 @@ import lombok.Data;
 // 2. 保留自定义 @Table 注解，维护业务属性（xmlName、dbName、belongTo）
 @Table(
         xmlName = "ITF_DCL_IO_DECL_GOODS",
-        dbName = "Dcl_B_Io_Decl_Goods",
         belongTo = ExitInspectionQuarantineOrder.class
 )
 public class ExitInspectionQuarantineOrderGoods {
@@ -32,7 +31,7 @@ public class ExitInspectionQuarantineOrderGoods {
     @TableId
     // 冗余节点：xmlName 置为空
     @TableField("Goods_Id")
-    @Column(xmlName = "", dbName = "Goods_Id")
+    @Column(xmlName = "")
     private String goodsId;
 
     /**
@@ -40,7 +39,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空（仅用于关联，不生成XML节点）
     @TableField("Decl_Id")
-    @Column(xmlName = "", dbName = "Decl_Id", joinKey = true, joinColumn = "declId")
+    @Column(xmlName = "", joinKey = true, joinColumn = "declId")
     private String declId;
 
     /**
@@ -48,7 +47,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Ent_Decl_No")
-    @Column(xmlName = "", dbName = "Ent_Decl_No")
+    @Column(xmlName = "")
     private String entDeclNo;
 
     /**
@@ -56,14 +55,14 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Goods_No")
-    @Column(xmlName = "", dbName = "Goods_No")
+    @Column(xmlName = "")
     private String goodsNo;
 
     /**
      * HS编号
      */
     @TableField("Prod_Hs_Code")
-    @Column(xmlName = "ITF_DCL_IO_DECL_GOODS_CONT/ProdHsCode", dbName = "Prod_Hs_Code")
+    @Column(xmlName = "ITF_DCL_IO_DECL_GOODS_CONT/ProdHsCode")
     private String prodHsCode;
 
     /**
@@ -71,14 +70,14 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Hs_Code_Desc")
-    @Column(xmlName = "", dbName = "Hs_Code_Desc")
+    @Column(xmlName = "")
     private String hsCodeDesc;
 
     /**
      * 申报货物名称（中文）
      */
     @TableField("Decl_Goods_Cname")
-    @Column(xmlName = "ITF_DCL_IO_DECL_GOODS_LIMIT/ITF_DCL_IO_DECL_GOODS_LIMIT_VN/ProdCnnm", dbName = "Decl_Goods_Cname")
+    @Column(xmlName = "ITF_DCL_IO_DECL_GOODS_LIMIT/ITF_DCL_IO_DECL_GOODS_LIMIT_VN/ProdCnnm")
     private String declGoodsCname;
 
     /**
@@ -86,7 +85,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Decl_Goods_Ename")
-    @Column(xmlName = "", dbName = "Decl_Goods_Ename")
+    @Column(xmlName = "")
     private String declGoodsEname;
 
     /**
@@ -94,7 +93,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Goods_Spec")
-    @Column(xmlName = "", dbName = "Goods_Spec")
+    @Column(xmlName = "")
     private String goodsSpec;
 
     /**
@@ -102,7 +101,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Goods_Model")
-    @Column(xmlName = "", dbName = "Goods_Model")
+    @Column(xmlName = "")
     private String goodsModel;
 
     /**
@@ -110,14 +109,14 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Orig_Place_Code")
-    @Column(xmlName = "", dbName = "Orig_Place_Code")
+    @Column(xmlName = "")
     private String origPlaceCode;
 
     /**
      * 原产国代码
      */
     @TableField("Ori_Ctry_Code")
-    @Column(xmlName = "CiqOriginCountry", dbName = "Ori_Ctry_Code")
+    @Column(xmlName = "CiqOriginCountry")
     private String oriCtryCode;
 
     /**
@@ -125,7 +124,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Goods_Brand")
-    @Column(xmlName = "", dbName = "Goods_Brand")
+    @Column(xmlName = "")
     private String goodsBrand;
 
     /**
@@ -133,70 +132,70 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Insp_Type")
-    @Column(xmlName = "", dbName = "Insp_Type")
+    @Column(xmlName = "")
     private String inspType;
 
     /**
      * 重量
      */
     @TableField("Weight")
-    @Column(xmlName = "CiqWeight", dbName = "Weight")
+    @Column(xmlName = "CiqWeight")
     private String weight;
 
     /**
      * 重量计量单位
      */
     @TableField("Wt_Meas_Unit")
-    @Column(xmlName = "CiqWtMeasUnit", dbName = "Wt_Meas_Unit")
+    @Column(xmlName = "CiqWtMeasUnit")
     private String wtMeasUnit;
 
     /**
      * 标准重量
      */
     @TableField("Std_Weight")
-    @Column(xmlName = "StdWeight", dbName = "Std_Weight")
+    @Column(xmlName = "StdWeight")
     private String stdWeight;
 
     /**
      * 标准重量单位代码
      */
     @TableField("Std_Weight_Unit_Code")
-    @Column(xmlName = "ITF_DCL_IO_DECL_GOODS_CONT/CiqWtUnitCode", dbName = "Std_Weight_Unit_Code")
+    @Column(xmlName = "ITF_DCL_IO_DECL_GOODS_CONT/CiqWtUnitCode")
     private String stdWeightUnitCode;
 
     /**
      * 数量
      */
     @TableField("Qty")
-    @Column(xmlName = "CiqQty", dbName = "Qty")
+    @Column(xmlName = "CiqQty")
     private String qty;
 
     /**
      * 数量计量单位
      */
     @TableField("Qty_Meas_Unit")
-    @Column(xmlName = "CiqQtyMeasUnit", dbName = "Qty_Meas_Unit")
+    @Column(xmlName = "CiqQtyMeasUnit")
     private String qtyMeasUnit;
 
     /**
      * 标准数量
      */
     @TableField("Std_Qty")
-    @Column(xmlName = "Qty1", dbName = "Std_Qty")
+    @Column(xmlName = "Qty1")
     private String stdQty;
 
     /**
      * 标准数量单位代码
      */
     @TableField("Std_Qty_Unit_Code")
-    @Column(xmlName = "Unit1", dbName = "Std_Qty_Unit_Code")
+    @Column(xmlName = "Unit1")
     private String stdQtyUnitCode;
 
     /**
      * 币种代码
      */
     @TableField("Currency")
-    @Column(xmlName = "CiqCurr", dbName = "Currency", linkTableColumn = "Ccl_C_Map_Curr-C_Scode-Q_Code")
+    @Column(xmlName = "CiqCurr", linkTableColumn = "Ccl_C_Map_Curr-C_Scode-Q_Code")
     private String currency;
 
     /**
@@ -204,14 +203,14 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Price_Per_Unit")
-    @Column(xmlName = "", dbName = "Price_Per_Unit")
+    @Column(xmlName = "")
     private String pricePerUnit;
 
     /**
      * 货物总值
      */
     @TableField("Goods_Total_Val")
-    @Column(xmlName = "GoodsTotalVal", dbName = "Goods_Total_Val")
+    @Column(xmlName = "GoodsTotalVal")
     private String goodsTotalVal;
 
     /**
@@ -219,7 +218,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Total_Val_Us")
-    @Column(xmlName = "", dbName = "Total_Val_Us")
+    @Column(xmlName = "")
     private String totalValUs;
 
     /**
@@ -227,7 +226,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Total_Val_Cn")
-    @Column(xmlName = "", dbName = "Total_Val_Cn")
+    @Column(xmlName = "")
     private String totalValCn;
 
     /**
@@ -235,7 +234,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Ciq_Code")
-    @Column(xmlName = "", dbName = "Ciq_Code")
+    @Column(xmlName = "")
     private String ciqCode;
 
     /**
@@ -243,7 +242,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Ciq_Name")
-    @Column(xmlName = "", dbName = "Ciq_Name")
+    @Column(xmlName = "")
     private String ciqName;
 
     /**
@@ -251,7 +250,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Ciq_Classify_Code")
-    @Column(xmlName = "", dbName = "Ciq_Classify_Code")
+    @Column(xmlName = "")
     private String ciqClassifyCode;
 
     /**
@@ -259,7 +258,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Ciq_Classify_Name")
-    @Column(xmlName = "", dbName = "Ciq_Classify_Name")
+    @Column(xmlName = "")
     private String ciqClassifyName;
 
     /**
@@ -267,7 +266,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Situation_Code")
-    @Column(xmlName = "", dbName = "Situation_Code")
+    @Column(xmlName = "")
     private String situationCode;
 
     /**
@@ -275,14 +274,14 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Situation_Level")
-    @Column(xmlName = "", dbName = "Situation_Level")
+    @Column(xmlName = "")
     private String situationLevel;
 
     /**
      * 用途代码
      */
     @TableField("Purpose")
-    @Column(xmlName = "Purpose", dbName = "Purpose")
+    @Column(xmlName = "Purpose")
     private String purpose;
 
     /**
@@ -290,7 +289,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Mnufctr_Reg_No")
-    @Column(xmlName = "", dbName = "Mnufctr_Reg_No")
+    @Column(xmlName = "")
     private String mnufctrRegNo;
 
     /**
@@ -298,7 +297,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Produce_Date")
-    @Column(xmlName = "", dbName = "Produce_Date")
+    @Column(xmlName = "")
     private String produceDate;
 
     /**
@@ -306,7 +305,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Prod_Batch_No")
-    @Column(xmlName = "", dbName = "Prod_Batch_No")
+    @Column(xmlName = "")
     private String prodBatchNo;
 
     /**
@@ -314,7 +313,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Prod_Valid_Dt")
-    @Column(xmlName = "", dbName = "Prod_Valid_Dt")
+    @Column(xmlName = "")
     private String prodValidDt;
 
     /**
@@ -322,14 +321,14 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Prod_Qgp")
-    @Column(xmlName = "", dbName = "Prod_Qgp")
+    @Column(xmlName = "")
     private String prodQgp;
 
     /**
      * 货物属性代码
      */
     @TableField("Goods_Attr")
-    @Column(xmlName = "GoodsAttr", dbName = "Goods_Attr")
+    @Column(xmlName = "GoodsAttr")
     private String goodsAttr;
 
     /**
@@ -337,7 +336,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Goods_Attr_Name")
-    @Column(xmlName = "", dbName = "Goods_Attr_Name")
+    @Column(xmlName = "")
     private String goodsAttrName;
 
     /**
@@ -345,7 +344,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Stuff")
-    @Column(xmlName = "", dbName = "Stuff")
+    @Column(xmlName = "")
     private String stuff;
 
     /**
@@ -353,7 +352,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Un_Code")
-    @Column(xmlName = "", dbName = "Un_Code")
+    @Column(xmlName = "")
     private String unCode;
 
     /**
@@ -361,7 +360,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Dang_Name")
-    @Column(xmlName = "", dbName = "Dang_Name")
+    @Column(xmlName = "")
     private String dangName;
 
     /**
@@ -369,7 +368,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Pack_Type")
-    @Column(xmlName = "", dbName = "Pack_Type")
+    @Column(xmlName = "")
     private String packType;
 
     /**
@@ -377,7 +376,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Pack_Spec")
-    @Column(xmlName = "", dbName = "Pack_Spec")
+    @Column(xmlName = "")
     private String packSpec;
 
     /**
@@ -385,7 +384,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Custm_Spv_Cond")
-    @Column(xmlName = "", dbName = "Custm_Spv_Cond")
+    @Column(xmlName = "")
     private String custmSpvCond;
 
     /**
@@ -393,7 +392,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Prod_Tag_Pic")
-    @Column(xmlName = "", dbName = "Prod_Tag_Pic")
+    @Column(xmlName = "")
     private String prodTagPic;
 
     /**
@@ -401,7 +400,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Is_List_Goods")
-    @Column(xmlName = "", dbName = "Is_List_Goods")
+    @Column(xmlName = "")
     private String isListGoods;
 
     /**
@@ -409,7 +408,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Cabin_No")
-    @Column(xmlName = "", dbName = "Cabin_No")
+    @Column(xmlName = "")
     private String cabinNo;
 
     /**
@@ -417,7 +416,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Wagon_No")
-    @Column(xmlName = "", dbName = "Wagon_No")
+    @Column(xmlName = "")
     private String wagonNo;
 
     /**
@@ -425,7 +424,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("By1")
-    @Column(xmlName = "", dbName = "By1")
+    @Column(xmlName = "")
     private String by1;
 
     /**
@@ -433,7 +432,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("By2")
-    @Column(xmlName = "", dbName = "By2")
+    @Column(xmlName = "")
     private String by2;
 
     /**
@@ -441,7 +440,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Eng_Man_Ent_Cnm")
-    @Column(xmlName = "", dbName = "Eng_Man_Ent_Cnm")
+    @Column(xmlName = "")
     private String engManEntCnm;
 
     /**
@@ -449,7 +448,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Rate")
-    @Column(xmlName = "", dbName = "Rate")
+    @Column(xmlName = "")
     private String rate;
 
     /**
@@ -457,7 +456,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Mnufctr_Reg_Name")
-    @Column(xmlName = "", dbName = "Mnufctr_Reg_Name")
+    @Column(xmlName = "")
     private String mnufctrRegName;
 
     /**
@@ -465,7 +464,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Orig_Place_Name")
-    @Column(xmlName = "", dbName = "Orig_Place_Name")
+    @Column(xmlName = "")
     private String origPlaceName;
 
     /**
@@ -473,7 +472,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Ori_Ctry_Name")
-    @Column(xmlName = "", dbName = "Ori_Ctry_Name")
+    @Column(xmlName = "")
     private String oriCtryName;
 
     /**
@@ -481,7 +480,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Wt_Unit_Name")
-    @Column(xmlName = "", dbName = "Wt_Unit_Name")
+    @Column(xmlName = "")
     private String wtUnitName;
 
     /**
@@ -489,7 +488,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Std_Weight_Unit_Name")
-    @Column(xmlName = "", dbName = "Std_Weight_Unit_Name")
+    @Column(xmlName = "")
     private String stdWeightUnitName;
 
     /**
@@ -497,7 +496,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Qty_Unit_Name")
-    @Column(xmlName = "", dbName = "Qty_Unit_Name")
+    @Column(xmlName = "")
     private String qtyUnitName;
 
     /**
@@ -505,7 +504,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Std_Qty_Unit_Name")
-    @Column(xmlName = "", dbName = "Std_Qty_Unit_Name")
+    @Column(xmlName = "")
     private String stdQtyUnitName;
 
     /**
@@ -513,7 +512,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Currency_Name")
-    @Column(xmlName = "", dbName = "Currency_Name")
+    @Column(xmlName = "")
     private String currencyName;
 
     /**
@@ -521,7 +520,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Purpose_Name")
-    @Column(xmlName = "", dbName = "Purpose_Name")
+    @Column(xmlName = "")
     private String purposeName;
 
     /**
@@ -529,7 +528,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("No_Dang_Flag")
-    @Column(xmlName = "", dbName = "No_Dang_Flag")
+    @Column(xmlName = "")
     private String noDangFlag;
 
     /**
@@ -537,7 +536,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Contract_Seq_No")
-    @Column(xmlName = "", dbName = "Contract_Seq_No")
+    @Column(xmlName = "")
     private String contractSeqNo;
 
     /**
@@ -545,7 +544,7 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Std_UnitType_Code")
-    @Column(xmlName = "", dbName = "Std_UnitType_Code")
+    @Column(xmlName = "")
     private String stdUnitTypeCode;
 
     /**
@@ -553,6 +552,6 @@ public class ExitInspectionQuarantineOrderGoods {
      */
     // 冗余节点：xmlName 置为空
     @TableField("SupvDmd")
-    @Column(xmlName = "", dbName = "SupvDmd")
+    @Column(xmlName = "")
     private String supvDmd;
 }
