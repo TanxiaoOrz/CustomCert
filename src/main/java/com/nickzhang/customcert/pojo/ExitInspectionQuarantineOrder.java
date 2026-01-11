@@ -25,31 +25,34 @@ public class ExitInspectionQuarantineOrder {
     /**
      * 申报ID
      */
-    // 3. 字段映射：添加 @TableField，value 赋值为 @Column 的 dbName（保持一致）
+    // 冗余节点：xmlName 置为空
     @TableField("Decl_Id")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Decl_Id", dbName = "Decl_Id")
+    @Column(xmlName = "", dbName = "Decl_Id")
     @TableId
     private String declId;
 
     /**
      * 企业申报编号
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Ent_Decl_No")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Ent_Decl_No", dbName = "Ent_Decl_No")
+    @Column(xmlName = "", dbName = "Ent_Decl_No")
     private String entDeclNo;
 
     /**
      * 申报编号
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Decl_No")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Decl_No", dbName = "Decl_No")
+    @Column(xmlName = "", dbName = "Decl_No")
     private String declNo;
 
     /**
      * 申报获取编号
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Decl_Get_No")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Decl_Get_No", dbName = "Decl_Get_No")
+    @Column(xmlName = "", dbName = "Decl_Get_No")
     private String declGetNo;
 
     /**
@@ -188,8 +191,9 @@ public class ExitInspectionQuarantineOrder {
     /**
      * 特殊检验检疫机构代码（预留，对应XML同级节点）
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Exc_Insp_Dept_Code")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Exc_Insp_Dept_Code", dbName = "Exc_Insp_Dept_Code")
+    @Column(xmlName = "", dbName = "Exc_Insp_Dept_Code")
     private String excInspDeptCode;
 
     /**
@@ -238,7 +242,7 @@ public class ExitInspectionQuarantineOrder {
      * 申请单证代码
      */
     @TableField("App_Cert_Code")
-    @Column(xmlName = "ITF_DCL_IO_DECL_CERT_TYPE/AppCertCode", dbName = "App_Cert_Code")
+    @Column(xmlName = "", dbName = "App_Cert_Code")
     private String appCertCode;
 
     /**
@@ -252,14 +256,14 @@ public class ExitInspectionQuarantineOrder {
      * 申请单证正本数
      */
     @TableField("Appl_Ori")
-    @Column(xmlName = "ITF_DCL_IO_DECL_CERT_TYPE/ApplOri", dbName = "Appl_Ori")
+    @Column(xmlName = "", dbName = "Appl_Ori")
     private String applOri;
 
     /**
      * 申请单证副本数
      */
     @TableField("Appl_Copy_Quan")
-    @Column(xmlName = "ITF_DCL_IO_DECL_CERT_TYPE/ApplCopyQuan", dbName = "Appl_Copy_Quan")
+    @Column(xmlName = "", dbName = "Appl_Copy_Quan")
     private String applCopyQuan;
 
     /**
@@ -419,8 +423,9 @@ public class ExitInspectionQuarantineOrder {
     /**
      * 是否列名货物
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Is_List_Good")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Is_List_Good", dbName = "Is_List_Good")
+    @Column(xmlName = "", dbName = "Is_List_Good")
     private String isListGood;
 
     /**
@@ -433,29 +438,33 @@ public class ExitInspectionQuarantineOrder {
     /**
      * 边防检查标识
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Ffj_Flag")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Ffj_Flag", dbName = "Ffj_Flag")
+    @Column(xmlName = "", dbName = "Ffj_Flag")
     private String ffjFlag;
 
     /**
      * 边防检查状态
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Ffj_Status")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Ffj_Status", dbName = "Ffj_Status")
+    @Column(xmlName = "", dbName = "Ffj_Status")
     private String ffjStatus;
 
     /**
      * 重发次数
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Resend_Num")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Resend_Num", dbName = "Resend_Num")
+    @Column(xmlName = "", dbName = "Resend_Num")
     private String resendNum;
 
     /**
      * 是否提取
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Is_Draw")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Is_Draw", dbName = "Is_Draw")
+    @Column(xmlName = "", dbName = "Is_Draw")
     private String isDraw;
 
     /**
@@ -482,57 +491,65 @@ public class ExitInspectionQuarantineOrder {
     /**
      * 费用处理状态
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Fee_Handle_State")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Fee_Handle_State", dbName = "Fee_Handle_State")
+    @Column(xmlName = "", dbName = "Fee_Handle_State")
     private String feeHandleState;
 
     /**
      * 放行状态
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Rels_State")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Rels_State", dbName = "Rels_State")
+    @Column(xmlName = "", dbName = "Rels_State")
     private String relsState;
 
     /**
      * 内陆口岸标识
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Flg_Port_Inland")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Flg_Port_Inland", dbName = "Flg_Port_Inland")
+    @Column(xmlName = "", dbName = "Flg_Port_Inland")
     private String flgPortInland;
 
     /**
      * 允许转运标识
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Enable_Trans_Flag")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Enable_Trans_Flag", dbName = "Enable_Trans_Flag")
+    @Column(xmlName = "", dbName = "Enable_Trans_Flag")
     private String enableTransFlag;
 
     /**
      * 处理状态
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Process_Status")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Process_Status", dbName = "Process_Status")
+    @Column(xmlName = "", dbName = "Process_Status")
     private String processStatus;
 
     /**
      * 处理环节
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Process_Link")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Process_Link", dbName = "Process_Link")
+    @Column(xmlName = "", dbName = "Process_Link")
     private String processLink;
 
     /**
      * 情况代码
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Situation_Code")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Situation_Code", dbName = "Situation_Code")
+    @Column(xmlName = "", dbName = "Situation_Code")
     private String situationCode;
 
     /**
      * 情况等级
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Situation_Level")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Situation_Level", dbName = "Situation_Level")
+    @Column(xmlName = "", dbName = "Situation_Level")
     private String situationLevel;
 
     /**
@@ -545,274 +562,312 @@ public class ExitInspectionQuarantineOrder {
     /**
      * 证书作废标识
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Cert_Cancel_Flag")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Cert_Cancel_Flag", dbName = "Cert_Cancel_Flag")
+    @Column(xmlName = "", dbName = "Cert_Cancel_Flag")
     private String certCancelFlag;
 
     /**
      * 操作代码
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Oper_Code")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Oper_Code", dbName = "Oper_Code")
+    @Column(xmlName = "", dbName = "Oper_Code")
     private String operCode;
 
     /**
      * 操作时间
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Oper_Time")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Oper_Time", dbName = "Oper_Time")
+    @Column(xmlName = "", dbName = "Oper_Time")
     private String operTime;
 
     /**
      * 归档标识
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Falg_Archive")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Falg_Archive", dbName = "Falg_Archive")
+    @Column(xmlName = "", dbName = "Falg_Archive")
     private String falgArchive;
 
     /**
      * 单据状态
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Bill_Status")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Bill_Status", dbName = "Bill_Status")
+    @Column(xmlName = "", dbName = "Bill_Status")
     private String billStatus;
 
     /**
      * 上传状态
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Upload_Status")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Upload_Status", dbName = "Upload_Status")
+    @Column(xmlName = "", dbName = "Upload_Status")
     private String uploadStatus;
 
     /**
      * 模块ID
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Module_Id")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Module_Id", dbName = "Module_Id")
+    @Column(xmlName = "", dbName = "Module_Id")
     private String moduleId;
 
     /**
      * 用户ID
      */
+    // 冗余节点：xmlName 置为空
     @TableField("User_Id")
-    @Column(xmlName = "ITF_DCL_IO_DECL/User_Id", dbName = "User_Id")
+    @Column(xmlName = "", dbName = "User_Id")
     private String userId;
 
     /**
      * 验证代码
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Verify_Code")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Verify_Code", dbName = "Verify_Code")
+    @Column(xmlName = "", dbName = "Verify_Code")
     private String verifyCode;
 
     /**
      * 数据来源
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Data_Source")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Data_Source", dbName = "Data_Source")
+    @Column(xmlName = "", dbName = "Data_Source")
     private String dataSource;
 
     /**
      * 贸易方式名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Trade_Mode_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Trade_Mode_Name", dbName = "Trade_Mode_Name")
+    @Column(xmlName = "", dbName = "Trade_Mode_Name")
     private String tradeModeName;
 
     /**
      * 贸易国别名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Trade_Country_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Trade_Country_Name", dbName = "Trade_Country_Name")
+    @Column(xmlName = "", dbName = "Trade_Country_Name")
     private String tradeCountryName;
 
     /**
      * 启运国家名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Desp_Ctry_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Desp_Ctry_Name", dbName = "Desp_Ctry_Name")
+    @Column(xmlName = "", dbName = "Desp_Ctry_Name")
     private String despCtryName;
 
     /**
      * 启运口岸名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Desp_Port_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Desp_Port_Name", dbName = "Desp_Port_Name")
+    @Column(xmlName = "", dbName = "Desp_Port_Name")
     private String despPortName;
 
     /**
      * 经停口岸名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Port_Stop_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Port_Stop_Name", dbName = "Port_Stop_Name")
+    @Column(xmlName = "", dbName = "Port_Stop_Name")
     private String portStopName;
 
     /**
      * 入境口岸名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Enty_Port_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Enty_Port_Name", dbName = "Enty_Port_Name")
+    @Column(xmlName = "", dbName = "Enty_Port_Name")
     private String entyPortName;
 
     /**
      * 目的地名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Dest_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Dest_Name", dbName = "Dest_Name")
+    @Column(xmlName = "", dbName = "Dest_Name")
     private String destName;
 
     /**
      * 口岸机构名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Insp_Org_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Insp_Org_Name", dbName = "Insp_Org_Name")
+    @Column(xmlName = "", dbName = "Insp_Org_Name")
     private String inspOrgName;
 
     /**
      * 申报海关名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Decl_Custm_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Decl_Custm_Name", dbName = "Decl_Custm_Name")
+    @Column(xmlName = "", dbName = "Decl_Custm_Name")
     private String declCustmName;
 
     /**
      * 特种标识内容
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Spec_Flag_Content")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Spec_Flag_Content", dbName = "Spec_Flag_Content")
+    @Column(xmlName = "", dbName = "Spec_Flag_Content")
     private String specFlagContent;
 
     /**
      * 目的机构名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Purp_Org_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Purp_Org_Name", dbName = "Purp_Org_Name")
+    @Column(xmlName = "", dbName = "Purp_Org_Name")
     private String purpOrgName;
 
     /**
      * 关联理由内容
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Correlation_Reason_Content")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Correlation_Reason_Content", dbName = "Correlation_Reason_Content")
+    @Column(xmlName = "", dbName = "Correlation_Reason_Content")
     private String correlationReasonContent;
 
     /**
      * 申报类型名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Decl_Type_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Decl_Type_Name", dbName = "Decl_Type_Name")
+    @Column(xmlName = "", dbName = "Decl_Type_Name")
     private String declTypeName;
 
     /**
      * 特殊通关内容
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Spec_Pass_Content")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Spec_Pass_Content", dbName = "Spec_Pass_Content")
+    @Column(xmlName = "", dbName = "Spec_Pass_Content")
     private String specPassContent;
 
     /**
      * 到达口岸名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Arriv_Port_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Arriv_Port_Name", dbName = "Arriv_Port_Name")
+    @Column(xmlName = "", dbName = "Arriv_Port_Name")
     private String arrivPortName;
 
     /**
      * 运输方式名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Trans_Mode_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Trans_Mode_Name", dbName = "Trans_Mode_Name")
+    @Column(xmlName = "", dbName = "Trans_Mode_Name")
     private String transModeName;
 
     /**
      * 申请类型
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Apl_Kind")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Apl_Kind", dbName = "Apl_Kind")
+    @Column(xmlName = "", dbName = "Apl_Kind")
     private String aplKind;
 
     /**
      * 汇总申报ID
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Sum_Decl_Id")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Sum_Decl_Id", dbName = "Sum_Decl_Id")
+    @Column(xmlName = "", dbName = "Sum_Decl_Id")
     private String sumDeclId;
 
     /**
      * 分运单号
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Split_Bill_Lad_No")
-    @Column(xmlName = "ITF_DCL_IO_DECL/SplitBillLadNo", dbName = "Split_Bill_Lad_No")
+    @Column(xmlName = "", dbName = "Split_Bill_Lad_No")
     private String splitBillLadNo;
 
     /**
      * 机构名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Org_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Org_Name", dbName = "Org_Name")
+    @Column(xmlName = "", dbName = "Org_Name")
     private String orgName;
 
     /**
      * 领证机关
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Vsa_Org_Code")
-    @Column(xmlName = "ITF_DCL_IO_DECL/VsaOrgCode", dbName = "Vsa_Org_Code")
+    @Column(xmlName = "", dbName = "Vsa_Org_Code")
     private String vsaOrgCode;
 
     /**
      * 领证机关名称
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Vsa_Org_Name")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Vsa_Org_Name", dbName = "Vsa_Org_Name")
+    @Column(xmlName = "", dbName = "Vsa_Org_Name")
     private String vsaOrgName;
 
     /**
      * 原集装箱标识
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Orig_Box_Flag")
-    @Column(xmlName = "ITF_DCL_IO_DECL/OrigBoxFlag", dbName = "Orig_Box_Flag")
+    @Column(xmlName = "", dbName = "Orig_Box_Flag")
     private String origBoxFlag;
 
     /**
      * 打印视图
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Print_Views")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Print_Views", dbName = "Print_Views")
+    @Column(xmlName = "", dbName = "Print_Views")
     private String printViews;
 
     /**
-     * 货物海关ID
+     * 不知为何存在的id,数据库里没有值
      */
     @TableField("Goods_Customs_Id")
-    @Column(xmlName = "ITF_DCL_IO_DECL_GOODS/GNo", dbName = "Goods_Customs_Id")
+    @Column(xmlName = "", dbName = "Goods_Customs_Id")
     private String goodsCustomsId;
 
     /**
      * 检验检疫单据号
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Insp_Bill_No")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Insp_Bill_No", dbName = "Insp_Bill_No")
+    @Column(xmlName = "", dbName = "Insp_Bill_No")
     private String inspBillNo;
 
     /**
      * 出口状态
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Export_State")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Export_State", dbName = "Export_State")
+    @Column(xmlName = "", dbName = "Export_State")
     private String exportState;
 
     /**
      * 响应流程状态
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Rsp_Flow_State")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Rsp_Flow_State", dbName = "Rsp_Flow_State")
+    @Column(xmlName = "", dbName = "Rsp_Flow_State")
     private String rspFlowState;
 
     /**
      * 海关申报关联号
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Cus_Decl_Related_No")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Cus_Decl_Related_No", dbName = "Cus_Decl_Related_No")
+    @Column(xmlName = "", dbName = "Cus_Decl_Related_No")
     private String cusDeclRelatedNo;
 
     /**
@@ -825,28 +880,32 @@ public class ExitInspectionQuarantineOrder {
     /**
      * 海关登记号
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Cus_Reg_No")
-    @Column(xmlName = "ITF_DCL_IO_DECL/Cus_Reg_No", dbName = "Cus_Reg_No")
+    @Column(xmlName = "", dbName = "Cus_Reg_No")
     private String cusRegNo;
 
     /**
      * 企业内部编号
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Cop_No")
-    @Column(xmlName = "ITF_DCL_IO_DECL/CopNo", dbName = "Cop_No")
+    @Column(xmlName = "", dbName = "Cop_No")
     private String copNo;
 
     /**
      * 检验检疫申请单位统一社会信用代码
      */
+    // 冗余节点：xmlName 置为空
     @TableField("DeclReg_Scc")
-    @Column(xmlName = "ITF_DCL_IO_DECL/DeclRegScc", dbName = "DeclReg_Scc")
+    @Column(xmlName = "", dbName = "DeclReg_Scc")
     private String declRegScc;
 
     /**
      * 发货人统一社会信用代码
      */
+    // 冗余节点：xmlName 置为空
     @TableField("Consignor_Scc")
-    @Column(xmlName = "ITF_DCL_IO_DECL/ConsignorScc", dbName = "Consignor_Scc")
+    @Column(xmlName = "", dbName = "Consignor_Scc")
     private String consignorScc;
 }

@@ -53,7 +53,7 @@ public class ExitInspectionQuarantineOrderRegionCert {
      * 申请单证代码
      */
     @TableField("App_Cert_Code")
-    @Column(xmlName = "AppCertCode", dbName = "App_Cert_Code")
+    @Column(xmlName = "", dbName = "App_Cert_Code")
     private String appCertCode;
 
     /**
