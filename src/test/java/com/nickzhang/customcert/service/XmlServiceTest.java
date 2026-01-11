@@ -24,9 +24,15 @@ public class XmlServiceTest {
 //    }
 
     @Test
-    public void generateXml() {
+    public void generateExitInspectionQuarantineOrder() {
         String result = xmlService.generateXmlText("出入境检疫单", "e21133f71ace487a80a8a4f54659adcc");
-        System.out.println("result = " + result);
+        assert result.equals("生成成功");
+    }
+
+    @Test
+    public void generateOriginCertificateGoods() {
+        String result = xmlService.generateXmlText("海关原产地证书", "b8fa1e85b9fa491691c5dc98709b36d7");
+        assert result.equals("生成成功");
     }
 
 }
