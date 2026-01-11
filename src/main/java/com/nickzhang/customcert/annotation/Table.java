@@ -40,9 +40,16 @@ public @interface Table {
      * 需要belongTo()指定主表 default 时是为主表
      */
     boolean isDependent() default false;
+
+    /**
+     * 是否为独立文件
+     */
+    boolean dividedFile() default false;
      /**
       * 列表显示名称
       */
     String showName() default "";
+
+
 
 }

@@ -17,7 +17,6 @@ import java.lang.reflect.Field;
  * @Description: 继承TableField注解 传递value=>数据库名称<br/>exists=>是否存在该字段<br/>
  * @Version: 1.0
  */
-@TableField
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Column {
@@ -25,8 +24,6 @@ public @interface Column {
     public final static String LINK_SEPARATOR = "-";
     public final static String XNL_SEPARATOR = "/";
 
-    @AliasFor(annotation = TableField.class, attribute = "value")
-    String dbName() default "";
     @AliasFor(annotation = TableField.class, attribute = "exists")
     boolean exists() default true;
     /**
@@ -48,7 +45,7 @@ public @interface Column {
      */
     boolean  joinKey() default false;
      /**
-      * 对应主表字段数据库名称
+      * 对应主表字段属性名称
       */
     String  joinColumn() default "id";
      /**

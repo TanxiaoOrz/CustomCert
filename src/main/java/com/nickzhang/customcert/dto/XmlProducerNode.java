@@ -255,13 +255,16 @@ public class XmlProducerNode {
 
     /**
      * 非独立从表时字段元素,记录所属主表类名,产生值时特殊处理
+     *
      * @param objectClassName 所属主表类名
      */
-    protected XmlProducerNode tobeDependentBelongClass(String objectClassName) {
+    protected void tobeDependentBelongClass(String objectClassName) {
         if (xmlNodeType == NODE_TYPE_ELEMENT_LIST)
-            return this;
+            return;
         this.objectClassName = objectClassName;
-        return this.tobeDependentBelongClass(objectClassName);
+        if (children != null) {
+            children.forEach(child -> child.tobeDependentBelongClass(objectClassName));
+        }
     }
 
     @Override

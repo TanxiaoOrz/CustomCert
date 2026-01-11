@@ -127,7 +127,22 @@ public class NodeUtils {
     }
 
 
+    /**
+     * 添加子节点到指定的父节点下
+     * @param child 待添加的子节点
+     * @param xmlNodeNames 子节点的层级路径（数组形式）空数组代表当前节点直接合并
+     * @param children 父节点的子节点列表
+     * @param cache 节点缓存，用于快速查找已存在的节点
+     */
     public static void addChild(XmlProducerNode child, String[] xmlNodeNames, List<XmlProducerNode> children, HashMap<String, XmlProducerNode> cache) {
+        // 无层级节点直接添加组
+        if (xmlNodeNames.length == 0 && child.getXmlNodeType() == XmlProducerNode.NODE_TYPE_ELEMENT) {
+            child.getChildren().forEach(c ->{
+                children.add(c);
+                cache.put(c.getXmlNodeName(), c);
+            });
+            return;
+        }
         String currentName = xmlNodeNames[0];
         // 单层节点直接添加到子节点列表
         if (xmlNodeNames.length == 1) {

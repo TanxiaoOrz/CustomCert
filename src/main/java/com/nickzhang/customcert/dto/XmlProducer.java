@@ -1,5 +1,6 @@
 package com.nickzhang.customcert.dto;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nickzhang.customcert.annotation.Column;
 import com.nickzhang.customcert.annotation.Table;
@@ -151,12 +152,13 @@ public class XmlProducer {
         Table table = tableClass.getAnnotation(Table.class);
         String detailXmlPath = table.xmlName();
         boolean isDependent = table.isDependent();
-        String[] detailXmlPathSegments = detailXmlPath.split(XNL_SEPARATOR);
+        String[] detailXmlPathSegments = detailXmlPath.isEmpty() ? new String[0] : detailXmlPath.split(XNL_SEPARATOR);
         XmlProducerNode detailNode ;
+        String tableNodeName = detailXmlPath.isEmpty()?"":detailXmlPathSegments[detailXmlPathSegments.length - 1];
         if (isDependent)
-            detailNode = new XmlProducerNode(detailXmlPathSegments[detailXmlPathSegments.length - 1], new ArrayList<>()); // 非独立从表创建元素节点缓存,后续合并使用
+            detailNode = new XmlProducerNode(tableNodeName, new ArrayList<>()); // 非独立从表创建元素节点缓存,后续合并使用
         else
-            detailNode = new XmlProducerNode(detailXmlPathSegments[detailXmlPathSegments.length - 1], new ArrayList<>(), tableClass.getName()); // 独立表创建数组节点(兼容单行)
+            detailNode = new XmlProducerNode(tableNodeName, new ArrayList<>(), tableClass.getName()); // 独立表创建数组节点(兼容单行)
 
         // 处理明细表子节点
         List<Field> fields = Arrays.asList(tableClass.getDeclaredFields());
@@ -180,7 +182,7 @@ public class XmlProducer {
         }).findFirst().ifPresentOrElse(
                 field -> {
                     mainIdGetterMethod.set(NodeUtils.getGetterMethod(table.belongTo(), field.getAnnotation(Column.class).joinColumn()));
-                    mainIdFieldName.set(field.getAnnotation(Column.class).dbName());
+                    mainIdFieldName.set(field.getAnnotation(TableField.class).value());
                 },
                 () -> {throw new RuntimeException("明细表" + tableClass.getName() + "无链接主键字段");}
         );
