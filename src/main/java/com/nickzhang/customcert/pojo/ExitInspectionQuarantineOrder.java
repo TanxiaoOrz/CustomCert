@@ -905,4 +905,10 @@ public class ExitInspectionQuarantineOrder {
     @TableField("Consignor_Scc")
     @Column(xmlName = "consignorScc")
     private String consignorScc;
+     /**
+      * 操作类型
+      */
+    @TableField(exist = false)
+    @Column(xmlName = "operType", defaultValue = "G")
+    private String operateType;
 }

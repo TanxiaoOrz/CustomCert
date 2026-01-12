@@ -23,6 +23,10 @@ import java.util.List;
 public class XmlProducerNode {
 
     /**
+     * xml节点名称
+     */
+    public static final int NODE_TYPE_DEFAULT = 4;
+    /**
      * xml节点类型 直接解析方法文本
      */
     public static final int NODE_TYPE_TEXT = 0;
@@ -67,6 +71,8 @@ public class XmlProducerNode {
     private String browserTableName;
     private String browserTableMainColumn;
     private String browserTableShowColumn;
+
+    private String defaultValue;
 
     /**
      * 元素节点构造函数 默认赋值NODE_TYPE_ELEMENT
@@ -119,6 +125,20 @@ public class XmlProducerNode {
         this.getValueMethod = getValueMethod;
         this.children = null;
         this.cache = null;
+    }
+
+     /**
+      * 默认节点构造函数 默认赋值NODE_TYPE_DEFAULT
+      *
+      * @param xmlNodeName xml节点名称
+      */
+    public XmlProducerNode(String xmlNodeName, String defaultValue) {
+        this.xmlNodeName = xmlNodeName;
+        this.xmlNodeType = NODE_TYPE_DEFAULT;
+        this.getValueMethod = null;
+        this.children = null;
+        this.cache = null;
+        this.defaultValue = defaultValue;
     }
 
     /**
@@ -196,6 +216,15 @@ public class XmlProducerNode {
         // 仅当 objectClassName 为空或与当前数据类名匹配时进行数据获取逻辑
         if (objectClassName==null || objectClassName.isEmpty() || objectClassName.equals(currentData.getClass().getName())) {
             switch (xmlNodeType) {
+                case NODE_TYPE_DEFAULT -> {
+                    // 1. 替换：dom4j 创建元素节点
+                    Element nodeElement = DocumentHelper.createElement(xmlNodeName);
+                    // 2. 替换：无需创建文本节点，直接用 setText() 赋值（自动处理空字符串）
+                    nodeElement.setText(defaultValue);
+                    // 3. 替换：dom4j 追加子节点到父节点
+                    belongs.add(nodeElement);
+                    return;
+                }
                 case NODE_TYPE_TEXT -> {
                     // 1. 替换：dom4j 创建元素节点
                     Element nodeElement = DocumentHelper.createElement(xmlNodeName);

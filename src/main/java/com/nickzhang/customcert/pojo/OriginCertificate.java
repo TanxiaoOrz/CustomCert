@@ -33,6 +33,12 @@ public class OriginCertificate {
     @Column(xmlName = "CertificateHead/CertNo")
     @TableField(value = "Cert_No")
     private String certNo;
+    /**
+     * 申请类型
+     */
+    @TableField(exist = false)
+    @Column(xmlName = "ApplyType", defaultValue = "0")
+    private String applyType;
 
     /**
      * 检验检疫注册号

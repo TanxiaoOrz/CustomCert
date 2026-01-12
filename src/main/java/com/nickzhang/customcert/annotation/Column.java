@@ -56,4 +56,12 @@ public @interface Column {
       * @idColumn: 关联表主键字段 选填 默认id
       */
     String linkTableColumn() default "";
+     /**
+      * 显示顺序 xml中升序
+      */
+    int order() default 0;
+     /**
+      * 默认值, 一般配合TableField.exist = false 使用
+      */
+    String defaultValue() default "";
 }

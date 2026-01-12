@@ -58,15 +58,13 @@ public class XmlProducer {
 
     private XmlDataGetter<?> xmlDataGetter;
 
-    private final String operType;
 
     // 替换：移除 org.w3c.dom 的构建器/转换器，使用 dom4j 的格式化配置
     private OutputFormat outputFormat;
 
-    public XmlProducer(HashMap<String, String> xmlRootAttributes, HashMap<String, String> xmlProperties, String operType) {
+    public XmlProducer(HashMap<String, String> xmlRootAttributes, HashMap<String, String> xmlProperties) {
         this.xmlRootAttributes = xmlRootAttributes;
         this.xmlProperties = xmlProperties;
-        this.operType = operType;
     }
 
     /**
@@ -86,7 +84,6 @@ public class XmlProducer {
         xmlProperties.put("ENCODING", "UTF-8");
         xmlProperties.put("VERSION", "1.0");
 
-        operType = "G";
     }
 
     /**
@@ -208,12 +205,23 @@ public class XmlProducer {
         return null;
     }
 
+    /**
+     * 通过字段注解生成基础节点
+     * @param detailClass 明细表类
+     * @param field 字段
+     * @param column 列注解
+     * @param xmlName xml节点名称
+     * @return 基础节点
+     */
     private XmlProducerNode getBaseNode(Class<?> detailClass, Field field, Column column, String xmlName) {
         XmlProducerNode node;
         String linkTableColumn = column.linkTableColumn();
-        if (linkTableColumn.isEmpty()) { // 文本字段
+        String defaultValue = column.defaultValue();
+        if (!defaultValue.isEmpty()) { // 固定值
+            node = new XmlProducerNode(NodeUtils.getLastSegmentAfterSlash(xmlName), defaultValue);
+        } else if (linkTableColumn.isEmpty()) { // 文本字段
             node = new XmlProducerNode(NodeUtils.getLastSegmentAfterSlash(xmlName), NodeUtils.getGetterMethod(detailClass, field));
-        } else {
+        } else { // 关联浏览字段
             String linkTableMainColumn;
             String linkTableName;
             String linkTableColumnShow;
@@ -249,8 +257,6 @@ public class XmlProducer {
         // 4. 追加子节点（需确保 XmlProducerNode.appendChildren 内部也适配 dom4j）
         children.forEach(node -> node.appendChildren(xmlData, utilsMapper, rootElement));
 
-        // 5. 添加 OperType 节点（替换 setTextContent 为 setText）
-        rootElement.addElement("OperType").setText(operType);
 
         // 3. 给根节点添加属性（方法名一致，逻辑不变）
         xmlRootAttributes.entrySet().stream().map(entry -> DocumentHelper.createNamespace(entry.getKey(), entry.getValue())).forEach(rootElement::add);
@@ -274,7 +280,6 @@ public class XmlProducer {
                 ", xmlRootAttributes=" + xmlRootAttributes + "\n" +
                 ", children=" + children.toString() + "\n" +
                 ", xmlProperties=" + xmlProperties + "\n" +
-                ", operType='" + operType + '\'' + "\n" +
                 '}';
     }
 }
