@@ -1,7 +1,6 @@
-package com.nickzhang.customcert.dto;
+package com.nickzhang.customcert.xml;
 
 import com.nickzhang.customcert.mapper.UtilsMapper;
-import com.nickzhang.customcert.utils.NodeUtils;
 import lombok.Getter;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -20,10 +19,10 @@ import java.util.List;
  * @Description: 凭证生成节点dto类（基于 dom4j 实现）
  * @Version: 1.0
  */
-public class XmlProducerNode {
+public class XmlProducerNode implements Comparable<XmlProducerNode> {
 
     /**
-     * xml节点名称
+     * xml节点类型 固定值节点
      */
     public static final int NODE_TYPE_DEFAULT = 4;
     /**
@@ -48,6 +47,8 @@ public class XmlProducerNode {
 
     @Getter
     private final int xmlNodeType;
+
+    protected final int order;
 
 
     /**
@@ -77,10 +78,11 @@ public class XmlProducerNode {
     /**
      * 元素节点构造函数 默认赋值NODE_TYPE_ELEMENT
      *
-     * @param xmlNodeName xml节点名称
-     * @param children    子节点列表
+     * @param xmlNodeName   xml节点名称
+     * @param children      子节点列表
+     * @param order         节点排序顺序
      */
-    public XmlProducerNode(String xmlNodeName, @NotNull List<XmlProducerNode> children) {
+    public XmlProducerNode(String xmlNodeName, @NotNull List<XmlProducerNode> children, int order) {
         this.xmlNodeName = xmlNodeName;
         this.xmlNodeType = NODE_TYPE_ELEMENT;
         this.children = children;
@@ -89,6 +91,7 @@ public class XmlProducerNode {
         for (XmlProducerNode child : children) {
             cache.put(child.xmlNodeName, child);
         }
+        this.order = order;
     }
 
 
@@ -100,8 +103,9 @@ public class XmlProducerNode {
      * @param xmlNodeName      xml节点名称
      * @param children         子节点列表
      * @param elementsClassName 元素列表类全限定名
+     * @param order             节点排序顺序
      */
-    public XmlProducerNode(String xmlNodeName, @NotNull List<XmlProducerNode> children, String elementsClassName) {
+    public XmlProducerNode(String xmlNodeName, @NotNull List<XmlProducerNode> children, String elementsClassName, int order) {
         this.xmlNodeName = xmlNodeName;
         this.xmlNodeType = NODE_TYPE_ELEMENT_LIST;
         this.children = children;
@@ -111,6 +115,7 @@ public class XmlProducerNode {
             cache.put(child.xmlNodeName, child);
         }
         this.objectClassName = elementsClassName;
+        this.order = order;
     }
 
     /**
@@ -118,27 +123,34 @@ public class XmlProducerNode {
      *
      * @param xmlNodeName    xml节点名称
      * @param getValueMethod 获取节点值的方法
+     * @param order          节点排序顺序
      */
-    public XmlProducerNode(String xmlNodeName, Method getValueMethod) {
+    public XmlProducerNode(String xmlNodeName, Method getValueMethod, int order) {
         this.xmlNodeName = xmlNodeName;
         this.xmlNodeType = NODE_TYPE_TEXT;
         this.getValueMethod = getValueMethod;
         this.children = null;
         this.cache = null;
+        this.order = order;
     }
+
+
+
+
 
      /**
       * 默认节点构造函数 默认赋值NODE_TYPE_DEFAULT
       *
       * @param xmlNodeName xml节点名称
       */
-    public XmlProducerNode(String xmlNodeName, String defaultValue) {
+    public XmlProducerNode(String xmlNodeName, String defaultValue, int order) {
         this.xmlNodeName = xmlNodeName;
         this.xmlNodeType = NODE_TYPE_DEFAULT;
         this.getValueMethod = null;
         this.children = null;
         this.cache = null;
         this.defaultValue = defaultValue;
+        this.order = order;
     }
 
     /**
@@ -150,7 +162,7 @@ public class XmlProducerNode {
      * @param browserTableMainColumn 关联表主键字段
      * @param browserTableShowColumn 关联表显示字段
      */
-    public XmlProducerNode(String xmlNodeName, Method getValueMethod, String browserTableName, String browserTableMainColumn, String browserTableShowColumn) {
+    public XmlProducerNode(String xmlNodeName, Method getValueMethod, String browserTableName, String browserTableMainColumn, String browserTableShowColumn, int order) {
         this.xmlNodeName = xmlNodeName;
         this.xmlNodeType = NODE_TYPE_BROWSER;
         this.browserTableName = browserTableName;
@@ -158,6 +170,27 @@ public class XmlProducerNode {
         this.browserTableShowColumn = browserTableShowColumn;
         this.getValueMethod = getValueMethod;
         children = null;
+        this.order = order;
+    }
+
+    /**
+     * 复制节点构造函数 建议只用于文本节点
+     *
+     * @param from        源节点
+     * @param xmlNodeName 新节点名称
+     */
+    public XmlProducerNode(XmlProducerNode from, String xmlNodeName) {
+        this.xmlNodeName = xmlNodeName;
+        this.xmlNodeType = from.xmlNodeType;
+        this.getValueMethod = from.getValueMethod;
+        this.children = null;
+        this.cache = null;
+        this.defaultValue = from.defaultValue;
+        this.order = from.order;
+        this.objectClassName =from.objectClassName;
+        this.browserTableName = from.browserTableName;
+        this.browserTableMainColumn = from.browserTableMainColumn;
+        this.browserTableShowColumn = from.browserTableShowColumn;
     }
 
     /**
@@ -181,8 +214,10 @@ public class XmlProducerNode {
      */
     protected void clearCache() {
         cache = null;
-        if (children != null)
+        if (children != null) {
+            children.sort(XmlProducerNode::compareTo);
             children.forEach(XmlProducerNode::clearCache);
+        }
     }
 
     /**
@@ -307,5 +342,13 @@ public class XmlProducerNode {
                 ", browserTableShowColumn='" + browserTableShowColumn + '\'' +
                 ", children=" + children + "\n" +
                 '}';
+    }
+
+    /**
+     * 节点排序, 使用orders排序
+     */
+    @Override
+    public int compareTo(XmlProducerNode o) {
+        return Integer.compare(order, o.order);
     }
 }

@@ -1,4 +1,4 @@
-package com.nickzhang.customcert.dto;
+package com.nickzhang.customcert.xml;
 
 import lombok.Getter;
 

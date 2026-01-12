@@ -25,7 +25,7 @@ public class OriginCertificate {
     /**
      * 证书ID
      */
-    @Column(xmlName = "") // 仅映射XML节点，无dbName属性
+    @Column() // 仅映射XML节点，无dbName属性
     @TableField(value = "Cert_Id") // 新规则：映射数据库下划线字段
     @TableId
     private String certId;
@@ -33,69 +33,107 @@ public class OriginCertificate {
     /**
      * 证书编号
      */
-    @Column(xmlName = "CertificateHead/CertNo")
+    @Column(xmlName = "CertificateHead/CertNo",order = 1)
     @TableField(value = "Cert_No")
     private String certNo;
     /**
      * 申请类型
      */
     @TableField(exist = false)
-    @Column(xmlName = "ApplyType", defaultValue = "0")
+    @Column(xmlName = "CertificateHead/ApplyType", defaultValue = "0",order = 2)
     private String applyType;
+
+    /**
+     * 证书状态
+     */
+    @Column(xmlName = "CertificateHead/CertState", order = 3)
+    @TableField(value = "Cert_State")
+    private String certState;
+
+    /**
+     * 证书种类
+     */
+    @Column(xmlName = "CertificateHead/CertType", order = 4)
+    @TableField(value = "Cert_Kind")
+    private String certKind;
+
+    /**
+     * 企业管理编号
+     */
+    @Column(xmlName = "CertificateHead/EntMgrNo", order = 5)
+    @TableField(value = "Ent_Mgr_No")
+    private String entMgrNo;
+
+
 
     /**
      * 检验检疫注册号
      */
-    @Column(xmlName = "CertificateHead/CiqRegNo")
+    @Column(xmlName = "CertificateHead/CiqRegNo", order = 6)
     @TableField(value = "Ciq_Reg_No")
     private String ciqRegNo;
 
     /**
+     * 申请注册号
+     */
+    @Column(xmlName = "CertificateHead/AplRegNo", order = 7)
+    @TableField(value = "APL_REG_NO")
+    private String aplRegNo;
+
+
+    /**
      * 出口商
      */
-    @Column(xmlName = "CertificateHead/Exporter")
+    @Column(xmlName = "CertificateHead/Exporter", order = 21)
     @TableField(value = "Exporter")
     private String exporter;
 
     /**
      * 收货人
      */
-    @Column(xmlName = "CertificateHead/Consignee")
+    @Column(xmlName = "CertificateHead/Consignee", order = 22)
     @TableField(value = "Consignee")
     private String consignee;
 
     /**
      * 目的地
      */
-    @Column(xmlName = "CertificateHead/Dest")
+    @Column(xmlName = "CertificateHead/DestCountry", order = 18)
     @TableField(value = "Dest")
     private String dest;
 
     /**
      * 目的地代码
      */
-    @Column(xmlName = "CertificateHead/DestCode")
+    @Column(xmlName = "CertificateHead/DestCountryCode", order = 19)
     @TableField(value = "Dest_Code")
     private String destCode;
 
     /**
+     * 目的地中文名称
+     */
+    @Column(xmlName = "CertificateHead/DestCountryName", order = 20,linkTableColumn = "Ori_C_Country-Country_Ename-Country_Name")
+    @TableField(value = "dest")
+    private String destChinese;
+
+    /**
      * 运输标志
      */
-    @Column(xmlName = "CertificateHead/Mark")
+    @Column(xmlName = "CertificateHead/Mark", order = 24)
     @TableField(value = "Mark")
     private String mark;
 
     /**
      * 发票编号
      */
-    @Column(xmlName = "CertificateHead/InvNo")
+    @Column(xmlName = "CertificateHead/InvNo", order = 16)
     @TableField(value = "Inv_No")
     private String invNo;
 
     /**
      * 申请地址
      */
-    @Column(xmlName = "CertificateHead/AplAddr")
+    @Column(xmlName = "CertificateHead/AplAdd", order = 14)
     @TableField(value = "Apl_Addr")
     private String aplAddr;
 
@@ -106,19 +144,6 @@ public class OriginCertificate {
     @TableField(value = "Apl_Addr_Code")
     private String aplAddrCode;
 
-    /**
-     * 证书状态
-     */
-    @Column(xmlName = "CertificateHead/CertState")
-    @TableField(value = "Cert_State")
-    private String certState;
-
-    /**
-     * 证书种类
-     */
-    @Column(xmlName = "CertificateHead/CertKind")
-    @TableField(value = "Cert_Kind")
-    private String certKind;
 
     /**
      * 审核日期
@@ -144,14 +169,14 @@ public class OriginCertificate {
     /**
      * 申请日期
      */
-    @Column(xmlName = "CertificateHead/ApplyDate")
+    @Column(xmlName = "CertificateHead/AplDate", order = 17)
     @TableField(value = "Apply_Date")
     private String applyDate;
 
     /**
      * 发票日期
      */
-    @Column(xmlName = "CertificateHead/InvDate")
+    @Column(xmlName = "CertificateHead/InvDate", order = 15)
     @TableField(value = "Inv_Date")
     private String invDate;
 
@@ -165,16 +190,10 @@ public class OriginCertificate {
     /**
      * 货物规格条款
      */
-    @Column(xmlName = "CertificateHead/GoodsSpecClause")
+    @Column(xmlName = "CertificateHead/GoodsSpecClause", order = 23)
     @TableField(value = "Goods_Spec_Clause")
     private String goodsSpecClause;
 
-    /**
-     * 企业管理编号
-     */
-    @Column(xmlName = "CertificateHead/EntMgrNo")
-    @TableField(value = "Ent_Mgr_No")
-    private String entMgrNo;
 
     /**
      * 条形码
@@ -200,45 +219,51 @@ public class OriginCertificate {
     /**
      * 装货港
      */
-    @Column(xmlName = "CertificateHead/LoadPort")
+    @Column(xmlName = "CertificateHead/LoadPort", order = 25)
     @TableField(value = "Load_Port")
     private String loadPort;
 
     /**
      * 卸货港
      */
-    @Column(xmlName = "CertificateHead/UnloadPort")
+    @Column(xmlName = "CertificateHead/UnloadPort", order = 26)
     @TableField(value = "Unload_Port")
     private String unloadPort;
 
     /**
      * 目的港
      */
-    @Column(xmlName = "CertificateHead/DestPort")
+    @Column(xmlName = "CertificateHead/DestPort", order = 32)
     @TableField(value = "Dest_Port")
     private String destPort;
 
     /**
      * 运输详情
      */
-    @Column(xmlName = "CertificateHead/TransDetails")
+    @Column(xmlName = "CertificateHead/TransDetails", order = 33)
     @TableField(value = "Trans_Details")
     private String transDetails;
 
     /**
      * 运输名称
      */
-    @Column(xmlName = "CertificateHead/TransName")
+    @Column(xmlName = "CertificateHead/TransName", order = 27)
     @TableField(value = "Trans_Name")
     private String transName;
 
     /**
-     * 备注
+     * 申请书备注
      */
-    @Column(xmlName = "CertificateHead/Remark")
+    @Column(xmlName = "CertificateHead/Note", order = 38)
     @TableField(value = "Remark")
     private String remark;
 
+     /**
+     * 证书备注信息
+     */
+    @Column(xmlName = "CertificateHead/Remark", order = 39)
+    @TableField(value = "remark")
+    private String remark2;
     /**
      * 机构英文名称
      */
@@ -319,7 +344,7 @@ public class OriginCertificate {
     /**
      * 拟出口日期
      */
-    @Column(xmlName = "CertificateHead/IntendExpDate")
+    @Column(xmlName = "CertificateHead/IntendExpDate", order = 24)
     @TableField(value = "Intend_Exp_Date")
     private String intendExpDate;
 
@@ -340,9 +365,22 @@ public class OriginCertificate {
     /**
      * 补发标识
      */
-    @Column(xmlName = "CertificateHead/ReissueFlag")
+    @Column(xmlName = "CertificateHead/CertStatus", order = 3)
     @TableField(value = "Reissue_Flag")
     private String reissueFlag;
+
+    /**
+     * 获取补发标识 处理转换逻辑
+     * @return 补发标识
+     */
+    @SuppressWarnings("unused")
+    public String getReissueFlag() {
+        if ("1".equals(reissueFlag)) {
+            return "2";
+        } else {
+            return "0";
+        }
+    }
 
     /**
      * 出口商电话
@@ -491,12 +529,6 @@ public class OriginCertificate {
     @TableField(value = "Export_State")
     private String exportState;
 
-    /**
-     * 申请注册号
-     */
-    @Column(xmlName = "CertificateHead/AplRegNo")
-    @TableField(value = "APL_REG_NO")
-    private String aplRegNo;
 
     /**
      * 三证合一注册号
@@ -515,7 +547,7 @@ public class OriginCertificate {
     /**
      * 运输方式
      */
-    @Column(xmlName = "CertificateHead/TransPort")
+    @Column(xmlName = "CertificateHead/TransPort", order = 31)
     @TableField(value = "Trans_Port")
     private String transPort;
 
@@ -529,21 +561,20 @@ public class OriginCertificate {
     /**
      * FOB价值
      */
-    @Column(xmlName = "CertificateHead/FOBValue")
+    @Column(xmlName = "CertificateHead/FOBValue", order = 36)
     @TableField(value = "Fob_Value")
     private String fobValue;
 
     /**
      * 总金额
      */
-    @Column(xmlName = "CertificateHead/TotalAmt")
     @TableField(value = "Total_Amt")
     private String totalAmt;
 
     /**
      * 运输工具
      */
-    @Column(xmlName = "CertificateHead/TransMeans")
+    @Column(xmlName = "CertificateHead/TransMeans", order = 27)
     @TableField(value = "Trans_Means")
     private String transMeans;
 

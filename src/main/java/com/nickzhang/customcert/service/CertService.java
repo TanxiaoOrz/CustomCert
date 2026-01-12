@@ -1,6 +1,6 @@
 package com.nickzhang.customcert.service;
 
-import com.nickzhang.customcert.dto.XmlProducer;
+import com.nickzhang.customcert.xml.XmlProducer;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

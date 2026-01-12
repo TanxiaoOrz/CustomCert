@@ -35,4 +35,11 @@ public class XmlServiceTest {
         assert result.equals("生成成功");
     }
 
+    @Test
+    public void generateOriginCertificateGoods2() {
+        String result = xmlService.generateXmlText("海关原产地证书", "0b76d190c71845169297d1bdd8b272b8\n");
+        assert result.equals("生成成功");
+    }
+
+
 }

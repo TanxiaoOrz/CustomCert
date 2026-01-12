@@ -8,8 +8,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nickzhang.customcert.annotation.Column;
 import com.nickzhang.customcert.annotation.Table;
 import com.nickzhang.customcert.annotation.TableMapper;
-import com.nickzhang.customcert.dto.XmlData;
-import com.nickzhang.customcert.dto.XmlProducer;
+import com.nickzhang.customcert.xml.XmlData;
+import com.nickzhang.customcert.xml.XmlProducer;
 import com.nickzhang.customcert.mapper.UtilsMapper;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -91,7 +91,7 @@ public class XmlService  implements InitializingBean {
     private String generateXmlText(XmlProducer xmlProducer,String mainId) {
         XmlData xmlData = xmlProducer.getXmlData(mapperList, mainId);
         String xmlText = xmlProducer.getXmlText(xmlData, utilsMapper);
-        log.info("class=>{}, mainId=>{}, xmlText:\n {}", xmlProducer.getClass().getSimpleName(), mainId, xmlText);
+        log.info("class=>{}, mainId=>{}, xmlText:\n {}", xmlProducer.getXmlRootName(), mainId, xmlText);
         return xmlText;
     }
 

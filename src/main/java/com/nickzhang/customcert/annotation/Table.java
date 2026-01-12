@@ -1,8 +1,5 @@
 package com.nickzhang.customcert.annotation;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import org.springframework.core.annotation.AliasFor;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -56,5 +53,10 @@ public @interface Table {
       *
       */
     String[] nameSpaces() default {};
+
+     /**
+      * 节点在xml文件中的顺序
+      */
+    int order() default 0;
 
 }

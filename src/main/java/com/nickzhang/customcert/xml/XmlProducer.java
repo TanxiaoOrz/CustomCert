@@ -1,11 +1,11 @@
-package com.nickzhang.customcert.dto;
+package com.nickzhang.customcert.xml;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nickzhang.customcert.annotation.Column;
 import com.nickzhang.customcert.annotation.Table;
 import com.nickzhang.customcert.mapper.UtilsMapper;
-import com.nickzhang.customcert.utils.NodeUtils;
+import lombok.Getter;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -54,6 +54,7 @@ public class XmlProducer {
     /**
      * xml 根节点名称
      */
+    @Getter
     private String xmlRootName;
 
     private XmlDataGetter<?> xmlDataGetter;
@@ -117,6 +118,8 @@ public class XmlProducer {
 
         // 清理缓存
         childNodeCache = null;
+
+        children.sort(XmlProducerNode::compareTo);
         children.forEach(XmlProducerNode::clearCache);
 
         return this;
@@ -131,27 +134,31 @@ public class XmlProducer {
         // outputFormat = OutputFormat.createCompactFormat(); // 无缩进、无换行的紧凑格式
 
         // 2. 从 xmlProperties 加载配置（对应原 Transformer 输出属性）
-        if (xmlProperties != null) {
-            // 编码配置
-            String encoding = xmlProperties.get("ENCODING");
-            if (encoding != null && !encoding.isEmpty()) {
-                outputFormat.setEncoding(encoding);
-            } else {
-                outputFormat.setEncoding("UTF-8"); // 默认 UTF-8
-            }
-
-            // 缩进配置（仅对 PrettyPrint 生效）
-            if ("yes".equalsIgnoreCase(xmlProperties.get("INDENT"))) {
-                outputFormat.setIndent(true);
-                outputFormat.setIndent("  "); // 缩进 2 个空格
-                outputFormat.setNewlines(true); // 开启换行
-            }
-
-            // 可选：强制空节点展开为 <tag></tag>（避免自闭合标签 <tag/>）
-            outputFormat.setExpandEmptyElements(true);
+        // 编码配置
+        String encoding = xmlProperties.get("ENCODING");
+        if (encoding != null && !encoding.isEmpty()) {
+            outputFormat.setEncoding(encoding);
+        } else {
+            outputFormat.setEncoding("UTF-8"); // 默认 UTF-8
         }
+
+        // 缩进配置（仅对 PrettyPrint 生效）
+        if ("yes".equalsIgnoreCase(xmlProperties.get("INDENT"))) {
+            outputFormat.setIndent(true);
+            outputFormat.setIndent("  "); // 缩进 2 个空格
+            outputFormat.setNewlines(true); // 开启换行
+        }
+
+        // 可选：强制空节点展开为 <tag></tag>（避免自闭合标签 <tag/>）
+        outputFormat.setExpandEmptyElements(true);
     }
 
+    /**
+     * 翻译子表（核心：根据子表类注解生成 XML 节点）
+     * @param tableClass 子表类
+     * @param subClasses 子类索引列表
+     * @param xmlDataGetter 上级数据获取器
+     */
     private void translateTable(Class<?> tableClass, HashMap<String, List<Class<?>>> subClasses, XmlDataGetter<?> xmlDataGetter) {
         // 处理子表主节点
         Table table = tableClass.getAnnotation(Table.class);
@@ -161,14 +168,14 @@ public class XmlProducer {
         XmlProducerNode detailNode ;
         String tableNodeName = detailXmlPath.isEmpty()?"":detailXmlPathSegments[detailXmlPathSegments.length - 1];
         if (isDependent)
-            detailNode = new XmlProducerNode(tableNodeName, new ArrayList<>()); // 非独立从表创建元素节点缓存,后续合并使用
+            detailNode = new XmlProducerNode(tableNodeName, new ArrayList<>(),table.order()); // 非独立从表创建元素节点缓存,后续合并使用
         else
-            detailNode = new XmlProducerNode(tableNodeName, new ArrayList<>(), tableClass.getName()); // 独立表创建数组节点(兼容单行)
+            detailNode = new XmlProducerNode(tableNodeName, new ArrayList<>(), tableClass.getName(),table.order()); // 独立表创建数组节点(兼容单行)
 
         // 处理明细表子节点
         List<Field> fields = Arrays.asList(tableClass.getDeclaredFields());
         fields.stream().map(field -> translateNode(tableClass, field, detailNode.getChildren(), detailNode.getCache())) // 生成子节点
-                .filter(Objects::nonNull).filter(nodes->isDependent).forEach(nodes->nodes.tobeDependentBelongClass(tableClass.getName())); // 若从属子表 注入类型名
+                .filter(Objects::nonNull).filter(nodes->isDependent).forEach(nodes->nodes.forEach(node->node.tobeDependentBelongClass(tableClass.getName()))); // 若从属子表 注入类型名
         List<Class<?>> detailClasses = subClasses.get(tableClass.getName());
 
         // 将子表节点进行添加
@@ -200,17 +207,37 @@ public class XmlProducer {
         }
     }
 
-    private XmlProducerNode translateNode(Class<?> tableClass, Field field, List<XmlProducerNode> children, HashMap<String, XmlProducerNode> childNodeCache) {
+    /**
+     * 翻译节点（核心：根据字段注解生成 XML 节点）
+     * @param tableClass 表类
+     * @param field 字段
+     * @param children 子节点列表
+     * @param childNodeCache 子节点缓存
+     * @return 生成的 XML 节点
+     */
+    private List<XmlProducerNode> translateNode(Class<?> tableClass, Field field, List<XmlProducerNode> children, HashMap<String, XmlProducerNode> childNodeCache) {
+        List<XmlProducerNode> nodes = new ArrayList<>();
         Column column = field.getAnnotation(Column.class);
         if (column != null) {
             String xmlName = column.xmlName();
             if (xmlName != null && !xmlName.isEmpty()) {
                 XmlProducerNode node = getBaseNode(tableClass, field, column, xmlName);
+                nodes.add(node);
                 NodeUtils.addChild(node, xmlName.split(XNL_SEPARATOR), children, childNodeCache);
-                return node;
+                String[] equalXmls = column.equalXml();
+                if (equalXmls !=null && equalXmls.length != 0) {
+                    Arrays.stream(equalXmls).forEach(equalXml-> {
+                        String[] eqlXmlSplit = equalXml.split(XNL_SEPARATOR);
+                        XmlProducerNode equalNode = new XmlProducerNode(node, eqlXmlSplit[eqlXmlSplit.length - 1]);
+                        nodes.add(equalNode);
+                        NodeUtils.addChild(equalNode, eqlXmlSplit, children, childNodeCache);
+                    });
+                }
+
+                return nodes;
             }
         }
-        return null;
+        return nodes;
     }
 
     /**
@@ -226,9 +253,9 @@ public class XmlProducer {
         String linkTableColumn = column.linkTableColumn();
         String defaultValue = column.defaultValue();
         if (!defaultValue.isEmpty()) { // 固定值
-            node = new XmlProducerNode(NodeUtils.getLastSegmentAfterSlash(xmlName), defaultValue);
+            node = new XmlProducerNode(NodeUtils.getLastSegmentAfterSlash(xmlName), defaultValue, column.order());
         } else if (linkTableColumn.isEmpty()) { // 文本字段
-            node = new XmlProducerNode(NodeUtils.getLastSegmentAfterSlash(xmlName), NodeUtils.getGetterMethod(detailClass, field));
+            node = new XmlProducerNode(NodeUtils.getLastSegmentAfterSlash(xmlName), NodeUtils.getGetterMethod(detailClass, field), column.order());
         } else { // 关联浏览字段
             String linkTableMainColumn;
             String linkTableName;
@@ -242,7 +269,7 @@ public class XmlProducer {
                 throw new RuntimeException("关联浏览字段配置错误，格式为：关联表名-关联表显示字段[-主建id]}", e);
             }
             node = new XmlProducerNode(NodeUtils.getLastSegmentAfterSlash(xmlName), NodeUtils.getGetterMethod(detailClass, field),
-                    linkTableName, linkTableMainColumn, linkTableColumnShow);
+                    linkTableName, linkTableMainColumn, linkTableColumnShow, column.order());
         }
         return node;
     }

@@ -39,63 +39,63 @@ public class OriginCertificateFile {
     /**
      * 证书编号（关联dbo.Ori_B_Cert_Edi表，对应XML节点CertNo）
      */
-    @Column(xmlName = "CertNo") // 精准匹配XML节点CertNo，不重复@Table的xmlName（File）
+    @Column(xmlName = "CertNo", order = 1) // 精准匹配XML节点CertNo，不重复@Table的xmlName（File）
     @TableField(value = "Cert_No")
     private String certNo;
 
     /**
      * 证书类型（对应XML节点CertType）
      */
-    @Column(xmlName = "CertType") // 精准匹配XML节点CertType
+    @Column(xmlName = "CertType", order = 2) // 精准匹配XML节点CertType
     @TableField(value = "Cert_Type")
     private String certType;
 
     /**
      * 录入企业代码（对应XML节点AplRegNo）
      */
-    @Column(xmlName = "AplRegNo") // 精准匹配XML节点AplRegNo
+    @Column(xmlName = "AplRegNo", order = 3) // 精准匹配XML节点AplRegNo
     @TableField(value = "Apl_Reg_No")
     private String aplRegNo;
 
     /**
      * 出口商代码（对应XML节点CiqRegNo）
      */
-    @Column(xmlName = "CiqRegNo") // 精准匹配XML节点CiqRegNo
+    @Column(xmlName = "CiqRegNo", order = 4) // 精准匹配XML节点CiqRegNo
     @TableField(value = "Ciq_Reg_No")
     private String ciqRegNo;
 
     /**
-     * 附件类型（对应XML节点FileType）
-     */
-    @Column(xmlName = "FileType") // 精准匹配XML节点FileType
-    @TableField(value = "File_Type")
-    private String fileType;
-
-    /**
      * 附件名字（对应XML节点FileName）
      */
-    @Column(xmlName = "FileName") // 精准匹配XML节点FileName
+    @Column(xmlName = "FileName", order = 5) // 精准匹配XML节点FileName
     @TableField(value = "File_Name")
     private String fileName;
 
     /**
+     * 附件类型（对应XML节点FileType）
+     */
+    @Column(xmlName = "FileType", order = 6) // 精准匹配XML节点FileType
+    @TableField(value = "File_Type")
+    private String fileType;
+
+    /**
      * 附件格式（对应XML节点DocType）
      */
-    @Column(xmlName = "DocType") // 精准匹配XML节点DocType
+    @Column(xmlName = "DocType", order = 7) // 精准匹配XML节点DocType
     @TableField(value = "Doc_Type")
     private String docType;
 
     /**
      * base64编码后的附件（对应XML节点FileContent）
      */
-    @Column(xmlName = "FileContent") // 精准匹配XML节点FileContent
+    @Column(xmlName = "FileContent", order = 8) // 精准匹配XML节点FileContent
     @TableField(value = "File_Content")
     private String fileContent;
 
     /**
      * 是否是缓审（对应XML节点IsDelay）
      */
-    @Column(xmlName = "IsDelay") // 精准匹配XML节点IsDelay
+    @Column(xmlName = "IsDelay", order = 9) // 精准匹配XML节点IsDelay
     @TableField(value = "is_Delay")
     private String isDelay;
 }

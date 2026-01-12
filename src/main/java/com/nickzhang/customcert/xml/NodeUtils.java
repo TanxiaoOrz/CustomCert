@@ -1,17 +1,15 @@
-package com.nickzhang.customcert.utils;
+package com.nickzhang.customcert.xml;
 
-import com.nickzhang.customcert.dto.XmlProducerNode;
-import org.dom4j.Element;
 import org.dom4j.Attribute;
-import java.util.List;
-import java.util.regex.Pattern;
+import org.dom4j.Element;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-
-import static com.nickzhang.customcert.annotation.Column.XNL_SEPARATOR;
+import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @Author: 张骏山
@@ -22,9 +20,6 @@ import static com.nickzhang.customcert.annotation.Column.XNL_SEPARATOR;
  * @Version: 1.0
  */
 public class NodeUtils {
-
-
-
 
     /**
      * 根据字段获取对应的 get/is 方法
@@ -102,30 +97,6 @@ public class NodeUtils {
         return input.substring(lastSlashIndex + 1);
     }
 
-    /**
-     * 计算字符串中 '/' 符号的数量
-     * @param input 输入字符串
-     * @return XNL_SEPARATOR 符号的数量
-     */
-    public static int countSlashes(String input) {
-        if (input == null) {
-            return 0;
-        }
-
-        if (input.isEmpty()) {
-            return 0;
-        }
-        int count = 0;
-        int index = 0;
-        int subLength = XNL_SEPARATOR.length();
-        while ((index = input.indexOf(XNL_SEPARATOR, index)) != -1) {
-            count++;
-            // 从匹配位置的下一个字符继续查找（避免重叠）
-            index += subLength;
-        }
-        return count;
-    }
-
 
     /**
      * 添加子节点到指定的父节点下
@@ -164,7 +135,7 @@ public class NodeUtils {
             // 递归添加子节点
             XmlProducerNode xmlProducerNode = cache.get(currentName);
             if (xmlProducerNode == null) {
-                xmlProducerNode = new XmlProducerNode(currentName, new ArrayList<>());
+                xmlProducerNode = new XmlProducerNode(currentName, new ArrayList<>(),child.order);
                 cache.put(currentName, xmlProducerNode);
                 children.add(xmlProducerNode);
             }
@@ -181,9 +152,6 @@ public class NodeUtils {
         if (element == null) {
             return true;
         }
-
-        // 定义正则：匹配空白字符（空格、制表符、换行符等，首尾不限）
-        Pattern blankPattern = Pattern.compile("^\\s*$");
 
         // 场景1：判断元素自身的文本内容是否有效（去除空白后非空）
         String textContent = element.getTextTrim(); // DOM4J 专属方法，直接去除首尾空白

@@ -1,4 +1,4 @@
-package com.nickzhang.customcert.dto;
+package com.nickzhang.customcert.xml;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -74,6 +74,9 @@ public class XmlDataGetter<P> {
             throw new RuntimeException("未找到对应的mapper");
         }
         Object mainData = mapper.selectById(mainId);
+        if (mainData == null) {
+            throw new RuntimeException("未找到对应的主数据");
+        }
         XmlData xmlData = new XmlData(mainData);
         childGetters.values().forEach(
                 childGetter -> xmlData.putChildren(childGetter.currentGetterName, childGetter.getDetailData(mappers, mainData))
@@ -100,7 +103,7 @@ public class XmlDataGetter<P> {
         List<P> ps;
         try {
             ps = mapper.selectList(new QueryWrapper<P>().eq(mainTableColumn, getMainIdMethod.invoke(belongTo)));
-        } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+        } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException |NullPointerException e) {
             throw new RuntimeException("当前节点 " + currentGetterName + " 调用子节点索引,抓换父节点id: method=>" + getMainIdMethod.getName() + ",belongTo=>" + belongTo.getClass().getName() + "时出错", e);
         }
         return ps.stream().map(p -> {

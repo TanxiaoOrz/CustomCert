@@ -7,7 +7,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
 
 /**
  * @Author: 张骏山
@@ -40,6 +39,13 @@ public @interface Column {
       * 是否在查询中显示
       */
     boolean searchShow() default false;
+//     /**
+//      * 固定范围器, 用于固定文本选项时使用
+//      *  暂时不用 后续优化时使用
+//      */
+//    String[] selectors() default {};
+
+
     /**
      * 是否主表链接字段
      */
@@ -59,9 +65,13 @@ public @interface Column {
      /**
       * 显示顺序 xml中升序
       */
-    int order() default 0;
+    int order() default 999;
      /**
       * 默认值, 一般配合TableField.exist = false 使用
       */
     String defaultValue() default "";
+     /**
+      * 相同取值xml节点名称数组, 用于不同节点取值逻辑相同时使用
+      */
+    String[] equalXml() default {};
 }

@@ -38,16 +38,52 @@ public class OriginCertificateApl {
     private String certId;
 
     /**
-     * 证书编号（关联dbo.Ori_B_Cert_Edi表）
+     * 联系人姓名
+     */
+    @Column(xmlName = "EtpsName", order = 8)
+    @TableField(value = "Name")
+    private String name;
+
+    /**
+     * 申请人
+     */
+    @Column(xmlName = "ApplName", order = 9, equalXml = {"EtpsConcEr"})
+    @TableField(value = "Applicant")
+    private String applicant;
+
+
+    /**
+     * 申请人ID
+     */
+    @Column(xmlName = "Applicant", order = 10)
+    @TableField(value = "Applicant_Id")
+    private String applicantId;
+
+    /**
+     * 申请人电话
+     */
+    @Column(xmlName = "ApplTel", order = 11, equalXml = {"EtpsTel"})
+    @TableField(value = "Applicant_Tel")
+    private String applicantTel;
+
+    /**
+     * 机构代码
+     */
+    @Column(xmlName = "OrgCode", order = 12)
+    @TableField(value = "Org_Code")
+    private String orgCode;
+
+
+    /**
+     * 证书编号（关联dbo.Ori_B_Cert_Edi表） apl重复字段
      */
     @Column(xmlName = "")
     @TableField(value = "Cert_No")
     private String certNo;
 
     /**
-     * 检验检疫注册号
+     * 检验检疫注册号 apl重复字段
      */
-    @Column(xmlName = "CiqRegNo")
     @TableField(value = "Ciq_Reg_No")
     private String ciqRegNo;
 
@@ -68,14 +104,14 @@ public class OriginCertificateApl {
     /**
      * 过境国代码
      */
-    @Column(xmlName = "TransCountryCode")
+    @Column(xmlName = "TransCountryCode", order = 29)
     @TableField(value = "Trans_Country_Code")
     private String transCountryCode;
 
     /**
      * 贸易方式代码
      */
-    @Column(xmlName = "TradeModeCode")
+    @Column(xmlName = "TradeModeCode", order = 35)
     @TableField(value = "Trade_Mode_Code")
     private String tradeModeCode;
 
@@ -86,19 +122,9 @@ public class OriginCertificateApl {
     @TableField(value = "Trade_Mode_Name")
     private String tradeModeName;
 
-    /**
-     * 申请人
-     */
-    @Column(xmlName = "Applicant")
-    @TableField(value = "Applicant")
-    private String applicant;
 
-    /**
-     * 申请人电话
-     */
-    @Column(xmlName = "ApplicantTel")
-    @TableField(value = "Applicant_Tel")
-    private String applicantTel;
+
+
 
     /**
      * 申请日期时间
@@ -115,25 +141,17 @@ public class OriginCertificateApl {
     private String remark;
 
     /**
-     * 证书种类
+     * 证书种类 apl重复字段
      */
-    @Column(xmlName = "CertKind")
     @TableField(value = "Cert_Kind")
     private String certKind;
 
     /**
-     * 企业管理编号
+     * 企业管理编号 apl重复字段
      */
-    @Column(xmlName = "EntMgrNo")
     @TableField(value = "Ent_Mgr_No")
     private String entMgrNo;
 
-    /**
-     * 机构代码
-     */
-    @Column(xmlName = "OrgCode")
-    @TableField(value = "Org_Code")
-    private String orgCode;
 
     /**
      * 机构名称
@@ -145,7 +163,7 @@ public class OriginCertificateApl {
     /**
      * 领取地点代码
      */
-    @Column(xmlName = "FetchPlace")
+    @Column(xmlName = "FetchPlace", order = 13)
     @TableField(value = "Fetch_Place")
     private String fetchPlace;
 
@@ -156,12 +174,7 @@ public class OriginCertificateApl {
     @TableField(value = "Fetch_Place_Name")
     private String fetchPlaceName;
 
-    /**
-     * 申请人ID
-     */
-    @Column(xmlName = "ApplicantId")
-    @TableField(value = "Applicant_Id")
-    private String applicantId;
+
 
     /**
      * 发送方参考号
@@ -173,7 +186,7 @@ public class OriginCertificateApl {
     /**
      * 过境国名称
      */
-    @Column(xmlName = "TransCountryName")
+    @Column(xmlName = "TransCountryName", order = 30)
     @TableField(value = "Trans_Country_Name")
     private String transCountryName;
 
@@ -198,12 +211,7 @@ public class OriginCertificateApl {
     @TableField(value = "Tel")
     private String tel;
 
-    /**
-     * 联系人姓名
-     */
-    @Column(xmlName = "Name")
-    @TableField(value = "Name")
-    private String name;
+
 
     /**
      * 不可重做标识
@@ -229,7 +237,7 @@ public class OriginCertificateApl {
     /**
      * 预测标识
      */
-    @Column(xmlName = "PredictFlag")
+    @Column(xmlName = "PredictFlag", order = 54)
     @TableField(value = "Predict_Flag")
     private String predictFlag;
 }
