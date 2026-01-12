@@ -19,7 +19,10 @@ import lombok.Data;
 // 1. 表名映射：添加 @TableName，value 赋值为 @Table 的 dbName（保持一致）
 @TableName("Dcl_B_Io_Decl")
 // 2. 保留自定义 @Table 注解，维护业务属性
-@Table(xmlName = "EEntDeclIo", showName = "出入境检疫单")
+@Table(xmlName = "EEntDeclIo", showName = "出入境检疫单",
+        schemaLocation = "http://www.chinaport.gov.cn/ciq DecCiqMessage.xsd",
+        nameSpaces = {"","http://www.chinaport.gov.cn/ciq","xsi","http://www.w3.org/2001/XMLSchema-instance"}
+)
 public class ExitInspectionQuarantineOrder {
 
     /**

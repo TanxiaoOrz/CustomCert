@@ -62,10 +62,10 @@ public class XmlProducer {
     // 替换：移除 org.w3c.dom 的构建器/转换器，使用 dom4j 的格式化配置
     private OutputFormat outputFormat;
 
-    public XmlProducer(HashMap<String, String> xmlRootAttributes, HashMap<String, String> xmlProperties) {
-        this.xmlRootAttributes = xmlRootAttributes;
-        this.xmlProperties = xmlProperties;
-    }
+//    public XmlProducer(HashMap<String, String> xmlRootAttributes, HashMap<String, String> xmlProperties) {
+//        this.xmlRootAttributes = xmlRootAttributes;
+//        this.xmlProperties = xmlProperties;
+//    }
 
     /**
      * 无参构造函数
@@ -73,16 +73,16 @@ public class XmlProducer {
     public XmlProducer() {
         this.xmlRootAttributes = new HashMap<>();
         this.xmlProperties = new HashMap<>();
-        schemaLocation = "http://www.chinaport.gov.cn/ciq DecCiqMessage.xsd";
-        xmlRootAttributes.put("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        xmlRootAttributes.put("", "http://www.chinaport.gov.cn/ciq");
-//        xmlRootAttributes.put("xmlns:", "http://www.chinaport.gov.cn/ciq");
-//        xmlRootAttributes.put("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-
-        // 替换：dom4j 格式化配置（对应原 Transformer 输出属性）
-        xmlProperties.put("INDENT", "yes");
-        xmlProperties.put("ENCODING", "UTF-8");
-        xmlProperties.put("VERSION", "1.0");
+//        schemaLocation = "http://www.chinaport.gov.cn/ciq DecCiqMessage.xsd";
+//        xmlRootAttributes.put("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+//        xmlRootAttributes.put("", "http://www.chinaport.gov.cn/ciq");
+////        xmlRootAttributes.put("xmlns:", "http://www.chinaport.gov.cn/ciq");
+////        xmlRootAttributes.put("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+//
+//        // 替换：dom4j 格式化配置（对应原 Transformer 输出属性）
+//        xmlProperties.put("INDENT", "yes");
+//        xmlProperties.put("ENCODING", "UTF-8");
+//        xmlProperties.put("VERSION", "1.0");
 
     }
 
@@ -98,6 +98,14 @@ public class XmlProducer {
         initDom4jOutputFormat();
 
         Table mainTable = tableClass.getAnnotation(Table.class);
+
+        schemaLocation = mainTable.schemaLocation();
+        String[] nameSpaces = mainTable.nameSpaces();
+        for (int i = 0; i < nameSpaces.length ; i += 2) {
+            xmlRootAttributes.put(nameSpaces[i], nameSpaces[i + 1]);
+        }
+
+
         xmlRootName = mainTable.xmlName();
         xmlDataGetter = new XmlDataGetter<>(tableClass.getName());
         Arrays.stream(tableClass.getDeclaredFields()).forEach(field -> translateNode(tableClass, field, children, childNodeCache));
@@ -261,7 +269,10 @@ public class XmlProducer {
         // 3. 给根节点添加属性（方法名一致，逻辑不变）
         xmlRootAttributes.entrySet().stream().map(entry -> DocumentHelper.createNamespace(entry.getKey(), entry.getValue())).forEach(rootElement::add);
 //        xmlRootAttributes.forEach(rootElement::addAttribute);
-        rootElement.addAttribute("xsi:schemaLocation", schemaLocation);
+        if (schemaLocation != null && !schemaLocation.isEmpty()) {
+            rootElement.addAttribute("xsi:schemaLocation", schemaLocation);
+
+        }
 
         // 6. dom4j 序列化 XML（替代 Transformer + DOMSource + StreamResult）
         try (StringWriter writer = new StringWriter()) {

@@ -16,7 +16,10 @@ import com.baomidou.mybatisplus.annotation.TableName;
 @Data
 @TableName(value = "dbo.Ori_B_Cert_Edi") // 新规则：映射数据库完整表名
 @Table(xmlName = "Certificate",
-        showName = "海关原产地证书") // 自定义@Table注解，保留表名与XML节点映射
+        showName = "海关原产地证书",
+        schemaLocation = "http://www.w3.org/2000/09/xmldsig# coo%20(1).xsd",
+        nameSpaces = {"","http://www.w3.org/2000/09/xmldsig#","xsi","http://www.w3.org/2001/XMLSchema-instance"}
+) // 自定义@Table注解，保留表名与XML节点映射
 public class OriginCertificate {
 
     /**

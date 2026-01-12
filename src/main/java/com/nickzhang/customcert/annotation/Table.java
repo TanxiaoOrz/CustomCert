@@ -13,18 +13,13 @@ import java.lang.annotation.Target;
  * @Date: 2026/1/5 22:02
  * @PackageName: com.nickzhang.customcert.annotation
  * @ClassName: Table
- * @Description: TODO
+ * @Description: 自定义xml生成类table注解
  * @Version: 1.0
  */
-@TableName
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Table {
-    /**
-     * 数据库表名称
-     */
-    @AliasFor(annotation = TableName.class, attribute = "value")
-    String dbName() default "";
     /**
      * 对应xml文件中节点,多节点使用${Column.XNL_SEPARATOR}分开
      */
@@ -50,6 +45,16 @@ public @interface Table {
       */
     String showName() default "";
 
-
+     /**
+      * xml文件中schemaLocation属性值
+      */
+    String schemaLocation() default "";
+     /**
+      * xml文件中根节点属性
+      * 目标格式: "xmlns:${前缀}=${uri}"
+      * 输入格式: "前缀1,uri1,前缀2,uri2"
+      *
+      */
+    String[] nameSpaces() default {};
 
 }
