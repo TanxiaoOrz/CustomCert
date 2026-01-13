@@ -1,6 +1,7 @@
 package com.nickzhang.customcert.xml;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nickzhang.customcert.annotation.Column;
 import com.nickzhang.customcert.annotation.Table;
@@ -12,9 +13,13 @@ import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 
+import java.io.FileOutputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -54,10 +59,21 @@ public class XmlProducer {
     /**
      * xml 根节点名称
      */
-    @Getter
     private String xmlRootName;
 
+    /**
+     * 主表类名, 唯一区分名称
+     */
+    @Getter
+    private String typeName;
+
+
     private XmlDataGetter<?> xmlDataGetter;
+
+    /**
+     * 获取主节点ID方法
+     */
+    private Method getMainIdMethod;
 
 
     // 替换：移除 org.w3c.dom 的构建器/转换器，使用 dom4j 的格式化配置
@@ -99,6 +115,7 @@ public class XmlProducer {
         initDom4jOutputFormat();
 
         Table mainTable = tableClass.getAnnotation(Table.class);
+        typeName = mainTable.showName();
 
         schemaLocation = mainTable.schemaLocation();
         String[] nameSpaces = mainTable.nameSpaces();
@@ -109,7 +126,13 @@ public class XmlProducer {
 
         xmlRootName = mainTable.xmlName();
         xmlDataGetter = new XmlDataGetter<>(tableClass.getName());
-        Arrays.stream(tableClass.getDeclaredFields()).forEach(field -> translateNode(tableClass, field, children, childNodeCache));
+        Field[] mainTableFields = tableClass.getDeclaredFields();
+        Arrays.stream(mainTableFields).forEach(field -> translateNode(tableClass, field, children, childNodeCache));
+        Arrays.stream(mainTableFields).filter(field -> field.isAnnotationPresent(TableId.class)).findFirst().ifPresent(field -> {
+            getMainIdMethod = NodeUtils.getGetterMethod(tableClass, field);
+        });
+
+
 
         List<Class<?>> detailClasses = subClasses.get(tableClass.getName());
         if (detailClasses != null) {
@@ -281,7 +304,7 @@ public class XmlProducer {
     /**
      * 核心替换：使用 dom4j 生成 XML 字符串（替代 org.w3c.dom 的 Transformer 逻辑）
      */
-    public String getXmlText(XmlData xmlData, UtilsMapper utilsMapper) {
+    public XmlActionConsequence getXmlText(XmlData xmlData, UtilsMapper utilsMapper) {
         // 1. 构建 dom4j Document（替代 org.w3c.dom.Document）
         Document document = DocumentHelper.createDocument();
 
@@ -298,14 +321,26 @@ public class XmlProducer {
 //        xmlRootAttributes.forEach(rootElement::addAttribute);
         if (schemaLocation != null && !schemaLocation.isEmpty()) {
             rootElement.addAttribute("xsi:schemaLocation", schemaLocation);
-
         }
 
         // 6. dom4j 序列化 XML（替代 Transformer + DOMSource + StreamResult）
         try (StringWriter writer = new StringWriter()) {
+            Object mainId = getMainIdMethod.invoke(xmlData.getCurrentData());
+            String baseFileName = String.format("%s_%s", typeName, mainId);
             XMLWriter xmlWriter = new XMLWriter(writer, outputFormat);
             xmlWriter.write(document);
-            return writer.toString().replace(" xmlns=\"\"", "");
+            xmlWriter.close();
+            String xmlText = writer.toString().replace(" xmlns=\"\"", "").replaceAll("(?m)^[ \\t]*\\r?\\n", "");
+            Path path = Paths.get(NodeUtils.getInputFilePath() + baseFileName + ".xml");
+            int trial = 0;
+            String fileName = baseFileName;
+            while (Files.exists(path)) {
+                trial++;
+                fileName = baseFileName + "_" + trial;
+                path = Paths.get(NodeUtils.getInputFilePath() + fileName + ".xml");
+            }
+            Files.write(path, xmlText.getBytes());
+            return new XmlActionConsequence().setFileName(fileName).setContext(xmlText).setSuccess(true).setMainId(mainId.toString());
         } catch (Exception e) {
             throw new RuntimeException("xml文件生产失败", e);
         }

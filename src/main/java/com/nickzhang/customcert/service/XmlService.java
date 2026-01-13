@@ -8,10 +8,14 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nickzhang.customcert.annotation.Column;
 import com.nickzhang.customcert.annotation.Table;
 import com.nickzhang.customcert.annotation.TableMapper;
+import com.nickzhang.customcert.mapper.XmlLogMapper;
+import com.nickzhang.customcert.po.XmlLog;
+import com.nickzhang.customcert.xml.XmlActionConsequence;
 import com.nickzhang.customcert.xml.XmlData;
 import com.nickzhang.customcert.xml.XmlProducer;
 import com.nickzhang.customcert.mapper.UtilsMapper;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -49,19 +53,30 @@ public class XmlService  implements InitializingBean {
       * 工具mapper
       */
     private final UtilsMapper utilsMapper;
+    private final XmlLogMapper xmlLogMapper;
 
+    /**
+     * 生成xml文件
+     * @param showName 展示名称
+     * @param mainId 主表主键值
+     * @return 生成的文件名称列表 第一个为生成结果 成功为"生成成功" 失败为"生成失败"
+     */
     @DS("pojo")
-    public String generateXmlText(String showName, String mainId) {
+    public List<XmlActionConsequence> generateXmlText(String showName, String mainId) {
         log.info("start generate xml, showName: {}, mainId: {}", showName, mainId);
-        {PoJoEntry poJoEntry = mainPoJoEntryMap.get(showName);
-        if (poJoEntry == null) {
-            throw new IllegalArgumentException("未找到对应的主POJO类：" + showName);
+        List<XmlActionConsequence> fileNameList = new ArrayList<>();
+        // 处理主文件
+        {
+            PoJoEntry poJoEntry = mainPoJoEntryMap.get(showName);
+            if (poJoEntry == null) {
+                throw new IllegalArgumentException("未找到对应的主POJO类：" + showName);
+            }
+            XmlProducer xmlProducer = poJoEntry.getXmlProducer();
+            XmlActionConsequence xmlText = generateXmlText(xmlProducer, mainId);
+            fileNameList.add(xmlText);
         }
-        XmlProducer xmlProducer = poJoEntry.getXmlProducer();
 
-            String xmlText = generateXmlText(xmlProducer, mainId);
-        }
-
+        // 处理从属子文件
         List<SubPoJoEntry> poJoEntries = belongDividedPojoEntryMap.get(showName);
         if (poJoEntries != null) {
             for (SubPoJoEntry entry : poJoEntries) {
@@ -74,32 +89,46 @@ public class XmlService  implements InitializingBean {
                     continue;
                 }
                 for (String belongTableId : belongTableIds) {
-                    String xmlText = generateXmlText(entry.getXmlProducer(), belongTableId);
+                    XmlActionConsequence xmlText = generateXmlText(entry.getXmlProducer(), belongTableId);
+                    fileNameList.add(xmlText);
                 }
             }
         }
-
-        return "生成成功";
+        return fileNameList;
     }
+
 
     /**
      * 生成xml文本
      * @param xmlProducer xml生产者
      * @param mainId 主表主键值
-     * @return xml文本
+     * @return 生成的文件名称
      */
-    private String generateXmlText(XmlProducer xmlProducer,String mainId) {
+    private XmlActionConsequence generateXmlText(XmlProducer xmlProducer,String mainId) {
         XmlData xmlData = xmlProducer.getXmlData(mapperList, mainId);
-        String xmlText = xmlProducer.getXmlText(xmlData, utilsMapper);
-        log.info("class=>{}, mainId=>{}, xmlText:\n {}", xmlProducer.getXmlRootName(), mainId, xmlText);
-        return xmlText;
+        XmlActionConsequence consequence = xmlProducer.getXmlText(xmlData, utilsMapper);
+        String typeName = xmlProducer.getTypeName();
+        log.info("xmlType=>{}, mainId=>{},fileName=>{}, xmlText:\n {}", typeName, mainId, consequence.getFileName(), consequence.getContext());
+//        int insertMainId = xmlLogMapper.insert(
+//                new XmlLog().setTypeName(typeName)
+//                        .setMainId(mainId)
+//                        .setInputFile(consequence.getFileName())
+//                        .setInputFileContext(consequence.getContext())
+//        );
+//        log.info("记录日志insertMainId=>{}", insertMainId);
+        return consequence;
     }
 
 
-    public XmlService(ApplicationContext applicationContext, UtilsMapper utilsMapper) {
+
+
+    public XmlService(ApplicationContext applicationContext, UtilsMapper utilsMapper, XmlLogMapper xmlLogMapper) {
         this.applicationContext = applicationContext;
         this.utilsMapper = utilsMapper;
+        this.xmlLogMapper = xmlLogMapper;
     }
+
+
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public void afterPropertiesSet() {
@@ -124,9 +153,12 @@ public class XmlService  implements InitializingBean {
                 mainPoJoEntryMap.put(table.showName(),new PoJoEntry().setPoJoClass(poJoClass).setTable(table));
             } else if (table.dividedFile()) { // 新增从属独立文件逻辑
                 String showName = belongTo.getAnnotation(Table.class).showName();
-                SubPoJoEntry poJoEntry = new SubPoJoEntry().setPoJoClass(poJoClass).setTable(table);
+                SubPoJoEntry poJoEntry = new SubPoJoEntry();
+                poJoEntry.setPoJoClass(poJoClass).setTable(table);
+
                 List<SubPoJoEntry> poJoEntries = belongDividedPojoEntryMap.computeIfAbsent(showName, k -> new ArrayList<>());
                 poJoEntries.add(poJoEntry);
+                mainPoJoEntryMap.put(showName,poJoEntry);
 
                 // 组装链接内容
                 String mainTable = belongTo.getAnnotation(TableName.class).value();
@@ -168,12 +200,10 @@ public class XmlService  implements InitializingBean {
             entry.setXmlProducer(new XmlProducer().initialize(entry.getPoJoClass(), pojoListMap));
             log.info("已初始化{}的构造器", entry.getPoJoClass().getSimpleName());
         });
-        belongDividedPojoEntryMap.forEach((key, entries) -> {
-            entries.forEach(entry -> {
-                entry.setXmlProducer(new XmlProducer().initialize(entry.getPoJoClass(), pojoListMap));
-                log.info("已初始化{}的构造器", entry.getPoJoClass().getSimpleName());
-            });
-        });
+//        belongDividedPojoEntryMap.forEach((key, entries) -> entries.forEach(entry -> {
+//            entry.setXmlProducer(new XmlProducer().initialize(entry.getPoJoClass(), pojoListMap));
+//            log.info("已初始化{}的构造器", entry.getPoJoClass().getSimpleName());
+//        }));
         log.info("已初始化所有构造器");
         log.info("XmlService初始化完成");
     }
@@ -203,12 +233,11 @@ class PoJoEntry {
     }
 }
 
+@EqualsAndHashCode(callSuper = false)
 @Data
 @Accessors(chain = true)
-class SubPoJoEntry {
-    Class<?> poJoClass;
-    XmlProducer xmlProducer;
-    Table table;
+class SubPoJoEntry extends PoJoEntry {
+
     String mainTable;
     String mainTableMainColumn;
     String mainLinkColumn;
@@ -221,6 +250,12 @@ class SubPoJoEntry {
         return "PoJoEntry{" +
                 "poJoClass=" + poJoClass + "\n" +
                 ", xmlProducer=" + xmlProducer + "\n" +
+                ", mainTable=" + mainTable + "\n" +
+                ", mainTableMainColumn=" + mainTableMainColumn + "\n" +
+                ", mainLinkColumn=" + mainLinkColumn + "\n" +
+                ", belongTable=" + belongTable + "\n" +
+                ", belongLinkColumn=" + belongLinkColumn + "\n" +
+                ", belongTableMainColumn=" + belongTableMainColumn + "\n" +
                 '}';
     }
 }

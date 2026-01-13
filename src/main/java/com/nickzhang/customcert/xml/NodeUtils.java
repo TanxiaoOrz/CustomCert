@@ -2,6 +2,10 @@ package com.nickzhang.customcert.xml;
 
 import org.dom4j.Attribute;
 import org.dom4j.Element;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -19,7 +23,40 @@ import java.util.regex.Pattern;
  * @Description: xmlNode操作公用文本处理类
  * @Version: 1.0
  */
-public class NodeUtils {
+
+@Component
+@PropertySource("classpath:front-end-processor.properties")
+public class NodeUtils implements InitializingBean {
+
+    private static NodeUtils instance;
+
+    /**
+     * 输入文件路径
+     */
+    @Value("${front-end-processor.file-path.input}")
+    private String inputFilePath;
+    /**
+     * 成功文件路径
+     */
+    @Value("${front-end-processor.file-path.success}")
+    private String successFilePath;
+    /**
+     * 失败文件路径
+     */
+    @Value("${front-end-processor.file-path.failure}")
+    private String failureFilePath;
+
+    public static String getInputFilePath() {
+        return instance.inputFilePath;
+    }
+     public static String getSuccessFilePath() {
+        return instance.successFilePath;
+    }
+     public static String getFailureFilePath() {
+        return instance.failureFilePath;
+    }
+
+
 
     /**
      * 根据字段获取对应的 get/is 方法
@@ -185,5 +222,10 @@ public class NodeUtils {
 
         // 无任何有效内容，视为空节点
         return !hasValidText && !hasValidAttribute && !hasValidChildElement;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        instance = this;
     }
 }
