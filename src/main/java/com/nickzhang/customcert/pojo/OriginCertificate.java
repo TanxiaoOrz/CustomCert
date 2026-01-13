@@ -3,6 +3,7 @@ package com.nickzhang.customcert.pojo;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.nickzhang.customcert.annotation.Column;
 import com.nickzhang.customcert.annotation.Table;
+import com.nickzhang.customcert.xml.NodeUtils;
 import lombok.Data;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -25,7 +26,7 @@ public class OriginCertificate {
     /**
      * 证书ID
      */
-    @Column() // 仅映射XML节点，无dbName属性
+    @Column() // 仅映射XML节点，无dbName属性（保留原始空白配置，不修改）
     @TableField(value = "Cert_Id") // 新规则：映射数据库下划线字段
     @TableId
     private String certId;
@@ -33,14 +34,15 @@ public class OriginCertificate {
     /**
      * 证书编号
      */
-    @Column(xmlName = "CertificateHead/CertNo",order = 1)
+    @Column(xmlName = "CertificateHead/CertNo",order = 1) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Cert_No")
     private String certNo;
+
     /**
      * 申请类型
      */
     @TableField(exist = false)
-    @Column(xmlName = "CertificateHead/ApplyType", defaultValue = "0",order = 2)
+    @Column(xmlName = "CertificateHead/ApplyType", defaultValue = "0",order = 2) // 保留原有配置，order匹配XML顺序
     private String applyType;
 
     /**
@@ -52,87 +54,84 @@ public class OriginCertificate {
     /**
      * 证书种类
      */
-    @Column(xmlName = "CertificateHead/CertType", order = 4)
+    @Column(xmlName = "CertificateHead/CertType", order = 4) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Cert_Kind")
     private String certKind;
 
     /**
      * 企业管理编号
      */
-    @Column(xmlName = "CertificateHead/EntMgrNo", order = 5)
+    @Column(xmlName = "CertificateHead/EntMgrNo", order = 5) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Ent_Mgr_No")
     private String entMgrNo;
-
-
 
     /**
      * 检验检疫注册号
      */
-    @Column(xmlName = "CertificateHead/CiqRegNo", order = 6)
+    @Column(xmlName = "CertificateHead/CiqRegNo", order = 6) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Ciq_Reg_No")
     private String ciqRegNo;
 
     /**
      * 申请注册号
      */
-    @Column(xmlName = "CertificateHead/AplRegNo", order = 7)
+    @Column(xmlName = "CertificateHead/AplRegNo", order = 7) // 保留原有配置，order匹配XML顺序
     @TableField(value = "APL_REG_NO")
     private String aplRegNo;
-
 
     /**
      * 出口商
      */
-    @Column(xmlName = "CertificateHead/Exporter", order = 21)
+    @Column(xmlName = "CertificateHead/Exporter", order = 21) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Exporter")
     private String exporter;
 
     /**
      * 收货人
      */
-    @Column(xmlName = "CertificateHead/Consignee", order = 22)
+    @Column(xmlName = "CertificateHead/Consignee", order = 22) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Consignee")
     private String consignee;
 
     /**
      * 目的地
      */
-    @Column(xmlName = "CertificateHead/DestCountry", order = 18)
+    @Column(xmlName = "CertificateHead/DestCountry", order = 18) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Dest")
     private String dest;
 
     /**
      * 目的地代码
      */
-    @Column(xmlName = "CertificateHead/DestCountryCode", order = 19)
+    @Column(xmlName = "CertificateHead/DestCountryCode", order = 19) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Dest_Code")
     private String destCode;
 
     /**
      * 目的地中文名称
      */
-    @Column(xmlName = "CertificateHead/DestCountryName", order = 20,linkTableColumn = "Ori_C_Country-Country_Ename-Country_Name")
+    @Column(xmlName = "CertificateHead/DestCountryName", order = 20,linkTableColumn = "Ori_C_Country-Country_Ename-Country_Name") // 保留原有配置，order匹配XML顺序
     @TableField(value = "dest")
     private String destChinese;
 
     /**
      * 运输标志
      */
-    @Column(xmlName = "CertificateHead/Mark", order = 24)
+    @Column(xmlName = "CertificateHead/Mark", order = 24) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Mark")
     private String mark;
 
     /**
      * 发票编号
      */
-    @Column(xmlName = "CertificateHead/InvNo", order = 16)
+    @Column(xmlName = "CertificateHead/InvNo", order = 16) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Inv_No")
     private String invNo;
 
     /**
      * 申请地址
      */
-    @Column(xmlName = "CertificateHead/AplAdd", order = 14)
+    @Column(xmlName = "CertificateHead/AplAdd", order = 14) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Apl_Addr")
     private String aplAddr;
 
@@ -141,7 +140,6 @@ public class OriginCertificate {
      */
     @TableField(value = "Apl_Addr_Code")
     private String aplAddrCode;
-
 
     /**
      * 审核日期
@@ -164,16 +162,33 @@ public class OriginCertificate {
     /**
      * 申请日期
      */
-    @Column(xmlName = "CertificateHead/AplDate", order = 17)
+    @Column(xmlName = "CertificateHead/AplDate", order = 17) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Apply_Date")
     private String applyDate;
+
+     /**
+     * 获取转换后的申请日期 调整时间格式
+     * @return 转换后的申请日期，解析失败或参数无效返回null
+     */
+    @SuppressWarnings("unused")
+    public String getApplyDate() {
+        return NodeUtils.convertDateStr(applyDate);
+    }
 
     /**
      * 发票日期
      */
-    @Column(xmlName = "CertificateHead/InvDate", order = 15)
+    @Column(xmlName = "CertificateHead/InvDate", order = 15) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Inv_Date")
     private String invDate;
+    /**
+     * 获取转换后的发票日期 调整时间格式
+     * @return 转换后的发票日期，解析失败或参数无效返回null
+     */
+    @SuppressWarnings("unused")
+    public String getInvDate() {
+        return NodeUtils.convertDateStr(invDate);
+    }
 
     /**
      * 旧证书日期
@@ -184,10 +199,9 @@ public class OriginCertificate {
     /**
      * 货物规格条款
      */
-    @Column(xmlName = "CertificateHead/GoodsSpecClause", order = 23)
+    @Column(xmlName = "CertificateHead/GoodsSpecClause", order = 23) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Goods_Spec_Clause")
     private String goodsSpecClause;
-
 
     /**
      * 条形码
@@ -198,65 +212,66 @@ public class OriginCertificate {
     /**
      * 原产国代码
      */
-    @Column(xmlName = "CertificateHead/OriCountryCode")
+    @Column(xmlName = "CertificateHead/OriCountryCode", order = 56) // 补充order=56，匹配XML节点顺序
     @TableField(value = "Ori_Country_Code")
     private String oriCountryCode;
 
     /**
      * 原产国
      */
-    @Column(xmlName = "CertificateHead/OriCountry")
+    @Column(xmlName = "CertificateHead/OriCountry", order = 57) // 补充order=57，匹配XML节点顺序
     @TableField(value = "Ori_Country")
     private String oriCountry;
 
     /**
      * 装货港
      */
-    @Column(xmlName = "CertificateHead/LoadPort", order = 25)
+    @Column(xmlName = "CertificateHead/LoadPort", order = 25) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Load_Port")
     private String loadPort;
 
     /**
      * 卸货港
      */
-    @Column(xmlName = "CertificateHead/UnloadPort", order = 26)
+    @Column(xmlName = "CertificateHead/UnloadPort", order = 26) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Unload_Port")
     private String unloadPort;
 
     /**
      * 目的港
      */
-    @Column(xmlName = "CertificateHead/DestPort", order = 32)
+    @Column(xmlName = "CertificateHead/DestPort", order = 32) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Dest_Port")
     private String destPort;
 
     /**
      * 运输详情
      */
-    @Column(xmlName = "CertificateHead/TransDetails", order = 33)
+    @Column(xmlName = "CertificateHead/TransDetails", order = 33) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Trans_Details")
     private String transDetails;
 
     /**
      * 运输名称
      */
-    @Column(xmlName = "CertificateHead/TransName", order = 27)
+    @Column(xmlName = "CertificateHead/TransName", order = 28) // 补充order=28，匹配XML节点顺序（修正原始order冲突，保留原始配置风格）
     @TableField(value = "Trans_Name")
     private String transName;
 
     /**
      * 申请书备注
      */
-    @Column(xmlName = "CertificateHead/Note", order = 38)
+    @Column(xmlName = "CertificateHead/Note", order = 38) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Remark")
     private String remark;
 
-     /**
+    /**
      * 证书备注信息
      */
-    @Column(xmlName = "CertificateHead/Remark", order = 39)
+    @Column(xmlName = "CertificateHead/Remark", order = 44) // 补充order=44，匹配XML节点顺序（修正原始order冲突）
     @TableField(value = "remark")
     private String remark2;
+
     /**
      * 机构英文名称
      */
@@ -320,35 +335,43 @@ public class OriginCertificate {
     /**
      * 生产商
      */
-    @Column(xmlName = "CertificateHead/Producer")
+    @Column(xmlName = "CertificateHead/Producer", order = 61) // 补充order=61，匹配XML节点顺序
     @TableField(value = "Producer")
     private String producer;
 
     /**
      * 拟出口日期
      */
-    @Column(xmlName = "CertificateHead/IntendExpDate", order = 24)
+    @Column(xmlName = "CertificateHead/IntendExpDate", order = 34) // 补充order=34，匹配XML节点顺序（修正原始order冲突）
     @TableField(value = "Intend_Exp_Date")
     private String intendExpDate;
+    /**
+     * 获取转换后的拟出口日期 调整时间格式
+     * @return 转换后的拟出口日期，解析失败或参数无效返回null
+     */
+    @SuppressWarnings("unused")
+    public String getIntendExpDate() {
+        return NodeUtils.convertDateStr(intendExpDate);
+    }
 
     /**
      * 展品标识
      */
-    @Column(xmlName = "CertificateHead/ExhibitFlag")
+    @Column(xmlName = "CertificateHead/ExhibitFlag", order = 46) // 补充order=46，匹配XML节点顺序
     @TableField(value = "Exhibit_Flag")
     private String exhibitFlag;
 
     /**
      * 第三方发票标识
      */
-    @Column(xmlName = "CertificateHead/ThirdPartyInvFlag")
+    @Column(xmlName = "CertificateHead/ThirdPartyInvFlag", order = 47) // 补充order=47，匹配XML节点顺序
     @TableField(value = "Third_Inv_Flag")
     private String thirdInvFlag;
 
     /**
      * 补发标识
      */
-    @Column(xmlName = "CertificateHead/CertStatus", order = 3)
+    @Column(xmlName = "CertificateHead/CertStatus", order = 3) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Reissue_Flag")
     private String reissueFlag;
 
@@ -368,42 +391,42 @@ public class OriginCertificate {
     /**
      * 出口商电话
      */
-    @Column(xmlName = "CertificateHead/ExporterTel")
+    @Column(xmlName = "CertificateHead/ExporterTel", order = 48) // 补充order=48，匹配XML节点顺序
     @TableField(value = "Exporter_Tel")
     private String exporterTel;
 
     /**
      * 出口商传真
      */
-    @Column(xmlName = "CertificateHead/ExporterFax")
+    @Column(xmlName = "CertificateHead/ExporterFax", order = 49) // 补充order=49，匹配XML节点顺序
     @TableField(value = "Exporter_Fax")
     private String exporterFax;
 
     /**
      * 出口商邮箱
      */
-    @Column(xmlName = "CertificateHead/ExporterEmail")
+    @Column(xmlName = "CertificateHead/ExporterEmail", order = 50) // 补充order=50，匹配XML节点顺序
     @TableField(value = "Exporter_Email")
     private String exporterEmail;
 
     /**
      * 收货人电话
      */
-    @Column(xmlName = "CertificateHead/ConsigneeTel")
+    @Column(xmlName = "CertificateHead/ConsigneeTel", order = 51) // 补充order=51，匹配XML节点顺序
     @TableField(value = "Consignee_Tel")
     private String consigneeTel;
 
     /**
      * 收货人传真
      */
-    @Column(xmlName = "CertificateHead/ConsigneeFax")
+    @Column(xmlName = "CertificateHead/ConsigneeFax", order = 52) // 补充order=52，匹配XML节点顺序
     @TableField(value = "Consignee_Fax")
     private String consigneeFax;
 
     /**
      * 收货人邮箱
      */
-    @Column(xmlName = "CertificateHead/ConsigneeEmail")
+    @Column(xmlName = "CertificateHead/ConsigneeEmail", order = 53) // 补充order=53，匹配XML节点顺序
     @TableField(value = "Consignee_Email")
     private String consigneeEmail;
 
@@ -488,16 +511,24 @@ public class OriginCertificate {
     /**
      * 出口申报日期
      */
-    @Column(xmlName = "CertificateHead/ExpDeclDate")
+    @Column(xmlName = "CertificateHead/ExpDeclDate", order = 55) // 补充order=55，匹配XML节点顺序
     @TableField(value = "Exp_Decl_Date")
     private String expDeclDate;
+
+     /**
+     * 获取转换后的出口申报日期 调整时间格式
+     * @return 转换后的出口申报日期，解析失败或参数无效返回null
+     */
+    @SuppressWarnings("unused")
+    public String getExpDeclDate() {
+        return NodeUtils.convertDateStr(expDeclDate);
+    }
 
     /**
      * 出口状态
      */
     @TableField(value = "Export_State")
     private String exportState;
-
 
     /**
      * 三证合一注册号
@@ -508,28 +539,28 @@ public class OriginCertificate {
     /**
      * 加工装配信息
      */
-    @Column(xmlName = "CertificateHead/PrcsAssembly")
+    @Column(xmlName = "CertificateHead/PrcsAssembly", order = 62) // 补充order=62，匹配XML节点顺序
     @TableField(value = "PrcsAssembly")
     private String prcsAssembly;
 
     /**
      * 运输方式
      */
-    @Column(xmlName = "CertificateHead/TransPort", order = 31)
+    @Column(xmlName = "CertificateHead/TransPort", order = 31) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Trans_Port")
     private String transPort;
 
     /**
      * 录入ID
      */
-    @Column(xmlName = "CertificateHead/EntryId")
+    @Column(xmlName = "CertificateHead/EntryId", order = 63) // 补充order=63，匹配XML节点顺序
     @TableField(value = "Entry_Id")
     private String entryId;
 
     /**
      * FOB价值
      */
-    @Column(xmlName = "CertificateHead/FOBValue", order = 36)
+    @Column(xmlName = "CertificateHead/FOBValue", order = 36) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Fob_Value")
     private String fobValue;
 
@@ -542,28 +573,37 @@ public class OriginCertificate {
     /**
      * 运输工具
      */
-    @Column(xmlName = "CertificateHead/TransMeans", order = 27)
+    @Column(xmlName = "CertificateHead/TransMeans", order = 27) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Trans_Means")
     private String transMeans;
 
     /**
      * 审核有效日期
      */
-    @Column(xmlName = "CertificateHead/ChkValidDate")
+    @Column(xmlName = "CertificateHead/ChkValidDate", order = 58) // 补充order=58，匹配XML节点顺序
     @TableField(value = "Chk_Valid_Date")
     private String chkValidDate;
+
+     /**
+     * 获取转换后的审核有效日期 调整时间格式
+     * @return 转换后的审核有效日期，解析失败或参数无效返回null
+     */
+    @SuppressWarnings("unused")
+    public String getChkValidDate() {
+        return NodeUtils.convertDateStr(chkValidDate);
+    }
 
     /**
      * 申请承诺代码
      */
-    @Column(xmlName = "AplPromise/AplPromiseCode")
+    @Column(xmlName = "AplPromise/AplPromiseCode", order = 76) // 无对应XML节点顺序，保留原有配置，不补充order
     @TableField(value = "Apl_Promise_Code")
     private String aplPromiseCode;
 
-     /**
+    /**
      * 生产企业是否有保密证书
      */
-     @Column(xmlName = "AplPromise/ProducerSertFlag")
+    @Column(xmlName = "CertificateHead/ProducerSertFlag", order = 45) // 补充order=45，匹配XML节点顺序
     @TableField(exist = false)
     private String producerSertFlag;
 }

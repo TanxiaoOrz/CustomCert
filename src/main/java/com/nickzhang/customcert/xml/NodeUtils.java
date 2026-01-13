@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -222,6 +225,50 @@ public class NodeUtils implements InitializingBean {
 
         // 无任何有效内容，视为空节点
         return !hasValidText && !hasValidAttribute && !hasValidChildElement;
+    }
+
+    /**
+     * 转换日期字符串格式，默认输入格式"yyyy-MM-dd HH:mm:ss.S"，输出格式"yyyy-MM-dd"
+     * @param originalDateStr 原始日期字符串
+     * @return 转换后的日期字符串，解析失败或参数无效返回null
+     */
+    public static String convertDateStr(String originalDateStr) {
+        return convertDateStr(originalDateStr, "yyyy-MM-dd HH:mm:ss.S", "yyyy-MM-dd");
+    }
+
+    /**
+     * 通用日期字符串转换方法
+     * @param originalDateStr 原始日期字符串
+     * @param inputPattern 原始日期字符串对应的格式（例如："yyyy-MM-dd HH:mm:ss.S"）
+     * @param outputPattern 目标日期字符串对应的格式（例如："yyyy-MM-dd"）
+     * @return 转换后的日期字符串，解析失败或参数无效返回null
+     */
+    public static String convertDateStr(String originalDateStr, String inputPattern, String outputPattern) {
+        // 1. 参数合法性校验
+        if (originalDateStr == null || originalDateStr.trim().isEmpty()) {
+            System.out.println("错误：原始日期字符串不能为空");
+            return null;
+        }
+        if (inputPattern == null || inputPattern.trim().isEmpty()) {
+            System.out.println("错误：输入日期格式不能为空");
+            return null;
+        }
+        if (outputPattern == null || outputPattern.trim().isEmpty()) {
+            System.out.println("错误：输出日期格式不能为空");
+            return null;
+        }
+
+        // 2. 定义格式化器
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern(inputPattern.trim());
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(outputPattern.trim());
+
+        try {
+            // 3. 解析并格式化
+            LocalDateTime localDateTime = LocalDateTime.parse(originalDateStr.trim(), inputFormatter);
+            return localDateTime.format(outputFormatter);
+        } catch (DateTimeParseException e) {
+            throw new RuntimeException("错误：日期解析失败，原始字符串格式与输入格式不匹配 originalDateStr= {} inputPattern= {} outputPattern= {} e=" + originalDateStr + inputPattern + outputPattern ,e);
+        }
     }
 
     @Override

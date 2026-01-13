@@ -3,8 +3,10 @@ package com.nickzhang.customcert.pojo;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.nickzhang.customcert.annotation.Column;
 import com.nickzhang.customcert.annotation.Table;
+import com.nickzhang.customcert.xml.NodeUtils;
 import lombok.Data;
 
 /**
@@ -82,7 +84,7 @@ public class OriginCertificateInvoice {
     /**
      * 货币代码（对应XML核心字段，默认值USD）
      */
-    @Column(xmlName = "Curr", order = 43,  linkTableColumn = "Ccl_C_Map_Curr-C_Scode-Q_Code")
+    @Column(xmlName = "Curr", order = 43)
     @TableField(value = "Ccy")
     private String ccy;
 
@@ -99,5 +101,13 @@ public class OriginCertificateInvoice {
     @Column(xmlName = "InvDate", order = 15)
     @TableField(value = "Inv_Date")
     private String invDate;
+    /**
+     * 获取转换后的发票日期 调整时间格式
+     * @return 转换后的发票日期，解析失败或参数无效返回null
+     */
+    @SuppressWarnings("unused")
+    public String getInvDate() {
+        return NodeUtils.convertDateStr(invDate);
+    }
 
 }
