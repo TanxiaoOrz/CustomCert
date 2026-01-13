@@ -1,7 +1,6 @@
 package com.nickzhang.customcert.service;
 
 import com.nickzhang.customcert.xml.XmlActionConsequence;
-import com.nickzhang.customcert.xml.XmlProducer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,10 +21,10 @@ public class XmlServiceTest {
     @Autowired
     private XmlService xmlService;
 
-//    @Test
-//    public void init() {
-//        System.out.println("xmlService.toString() = " + xmlService.toString());
-//    }
+    @Test
+    public void init() {
+        System.out.println("xmlService.toString() = " + xmlService.toString());
+    }
 
     @Test
     public void generateExitInspectionQuarantineOrder() {
@@ -41,7 +40,13 @@ public class XmlServiceTest {
 
     @Test
     public void generateOriginCertificateGoods2() {
-        List<XmlActionConsequence> result = xmlService.generateXmlText("海关原产地证书", "0b76d190c71845169297d1bdd8b272b8\n");
+        List<XmlActionConsequence> result = xmlService.generateXmlText("海关原产地证书", "0b76d190c71845169297d1bdd8b272b8");
+        assert !result.isEmpty();
+    }
+
+    @Test
+    public void generateOriginCertificateGoods3() {
+        List<XmlActionConsequence> result = xmlService.generateXmlText("海关原产地证书", "bdb41d9bbe624bf3af0064c0c986fdb2");
         assert !result.isEmpty();
     }
 

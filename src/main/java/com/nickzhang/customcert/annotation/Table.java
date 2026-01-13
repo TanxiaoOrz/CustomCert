@@ -57,6 +57,6 @@ public @interface Table {
      /**
       * 节点在xml文件中的顺序
       */
-    int order() default 0;
+    int order() default 999;
 
 }

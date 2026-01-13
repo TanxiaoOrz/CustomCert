@@ -8,12 +8,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nickzhang.customcert.annotation.Column;
 import com.nickzhang.customcert.annotation.Table;
 import com.nickzhang.customcert.annotation.TableMapper;
-import com.nickzhang.customcert.mapper.XmlLogMapper;
-import com.nickzhang.customcert.po.XmlLog;
+import com.nickzhang.customcert.mapper.UtilsMapper;
 import com.nickzhang.customcert.xml.XmlActionConsequence;
 import com.nickzhang.customcert.xml.XmlData;
 import com.nickzhang.customcert.xml.XmlProducer;
-import com.nickzhang.customcert.mapper.UtilsMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -53,7 +51,6 @@ public class XmlService  implements InitializingBean {
       * 工具mapper
       */
     private final UtilsMapper utilsMapper;
-    private final XmlLogMapper xmlLogMapper;
 
     /**
      * 生成xml文件
@@ -122,10 +119,9 @@ public class XmlService  implements InitializingBean {
 
 
 
-    public XmlService(ApplicationContext applicationContext, UtilsMapper utilsMapper, XmlLogMapper xmlLogMapper) {
+    public XmlService(ApplicationContext applicationContext, UtilsMapper utilsMapper) {
         this.applicationContext = applicationContext;
         this.utilsMapper = utilsMapper;
-        this.xmlLogMapper = xmlLogMapper;
     }
 
 
@@ -152,13 +148,12 @@ public class XmlService  implements InitializingBean {
             if (belongTo == Object.class ) {
                 mainPoJoEntryMap.put(table.showName(),new PoJoEntry().setPoJoClass(poJoClass).setTable(table));
             } else if (table.dividedFile()) { // 新增从属独立文件逻辑
-                String showName = belongTo.getAnnotation(Table.class).showName();
                 SubPoJoEntry poJoEntry = new SubPoJoEntry();
                 poJoEntry.setPoJoClass(poJoClass).setTable(table);
 
-                List<SubPoJoEntry> poJoEntries = belongDividedPojoEntryMap.computeIfAbsent(showName, k -> new ArrayList<>());
+                List<SubPoJoEntry> poJoEntries = belongDividedPojoEntryMap.computeIfAbsent(belongTo.getAnnotation(Table.class).showName(), k -> new ArrayList<>());
                 poJoEntries.add(poJoEntry);
-                mainPoJoEntryMap.put(showName,poJoEntry);
+                mainPoJoEntryMap.put(table.showName(),poJoEntry);
 
                 // 组装链接内容
                 String mainTable = belongTo.getAnnotation(TableName.class).value();
@@ -213,6 +208,7 @@ public class XmlService  implements InitializingBean {
         return "XmlService{" +
                 "mapperList=" + mapperList + "\n" +
                 ", mainPoJoEntryMap=" + mainPoJoEntryMap + "\n" +
+                ", belongDividedPojoEntryMap=" + belongDividedPojoEntryMap + "\n" +
                 '}';
     }
 }
@@ -228,7 +224,7 @@ class PoJoEntry {
     public String toString() {
         return "PoJoEntry{" +
                 "poJoClass=" + poJoClass + "\n" +
-                ", xmlProducer=" + xmlProducer + "\n" +
+                ", xmlProducer=" + (xmlProducer==null?"null":"exist") + "\n" +
                 '}';
     }
 }
@@ -249,7 +245,7 @@ class SubPoJoEntry extends PoJoEntry {
     public String toString() {
         return "PoJoEntry{" +
                 "poJoClass=" + poJoClass + "\n" +
-                ", xmlProducer=" + xmlProducer + "\n" +
+                ", xmlProducer=" + (xmlProducer==null?"null":"exist") + "\n" +
                 ", mainTable=" + mainTable + "\n" +
                 ", mainTableMainColumn=" + mainTableMainColumn + "\n" +
                 ", mainLinkColumn=" + mainLinkColumn + "\n" +

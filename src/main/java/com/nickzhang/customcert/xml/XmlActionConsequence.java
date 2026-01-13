@@ -3,6 +3,8 @@ package com.nickzhang.customcert.xml;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
+
 /**
  * @Author: 张骏山
  * @Date: 2026/1/13 16:44
@@ -17,5 +19,6 @@ public class XmlActionConsequence {
     private String fileName;
     private String context;
     private String mainId;
+    private Date dateTime;
     private boolean success;
 }

@@ -72,6 +72,7 @@ public @interface Column {
     String defaultValue() default "";
      /**
       * 相同取值xml节点名称数组, 用于不同节点取值逻辑相同时使用
+      * @example: {"xmlNode1-order1","xmlNode2-order2"}
       */
     String[] equalXml() default {};
 }

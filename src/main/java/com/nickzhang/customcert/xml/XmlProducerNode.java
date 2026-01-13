@@ -2,6 +2,7 @@ package com.nickzhang.customcert.xml;
 
 import com.nickzhang.customcert.mapper.UtilsMapper;
 import lombok.Getter;
+import lombok.Setter;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @Author: 张骏山
@@ -68,6 +70,12 @@ public class XmlProducerNode implements Comparable<XmlProducerNode> {
      * 数据获取对象全限定名
      */
     private String objectClassName;
+    /**
+     * 从属表级联降级关联类全限定名列表
+     * 用于关联字段从从属表获取时无上级节点辅助object读取的特殊情况
+     */
+    @Setter
+    private List<String> subObjectClassNames;
 
     private String browserTableName;
     private String browserTableMainColumn;
@@ -179,14 +187,14 @@ public class XmlProducerNode implements Comparable<XmlProducerNode> {
      * @param from        源节点
      * @param xmlNodeName 新节点名称
      */
-    public XmlProducerNode(XmlProducerNode from, String xmlNodeName) {
+    public XmlProducerNode(XmlProducerNode from, String xmlNodeName, int order) {
         this.xmlNodeName = xmlNodeName;
         this.xmlNodeType = from.xmlNodeType;
         this.getValueMethod = from.getValueMethod;
         this.children = null;
         this.cache = null;
         this.defaultValue = from.defaultValue;
-        this.order = from.order;
+        this.order = order;
         this.objectClassName =from.objectClassName;
         this.browserTableName = from.browserTableName;
         this.browserTableMainColumn = from.browserTableMainColumn;
@@ -231,7 +239,18 @@ public class XmlProducerNode implements Comparable<XmlProducerNode> {
         Object currentData = xmlData.getCurrentData();
         // NODE_TYPE_ELEMENT_LIST 元素列表节点 一定需要处理调整数据来源
         if (NODE_TYPE_ELEMENT_LIST == xmlNodeType) {
-            List<XmlData> xmlDataChildren = xmlData.getChildren(objectClassName);
+            AtomicReference<XmlData> xmlParent = new AtomicReference<>(xmlData);
+            // 兼容处理上级时从属表的情况
+            if (subObjectClassNames != null && !subObjectClassNames.isEmpty()) {
+                subObjectClassNames.forEach(className -> {
+                    List<XmlData> xmlDataChildren = xmlParent.get().getChildren(className);
+                    if (xmlDataChildren != null && !xmlDataChildren.isEmpty())
+                        xmlParent.set(xmlDataChildren.get(0));
+                    else
+                        return;
+                });
+            }
+            List<XmlData> xmlDataChildren = xmlParent.get().getChildren(objectClassName);
             if (xmlDataChildren == null)
                 return;
             xmlDataChildren.forEach(data -> {
@@ -322,12 +341,17 @@ public class XmlProducerNode implements Comparable<XmlProducerNode> {
      *
      * @param objectClassName 所属主表类名
      */
-    protected void tobeDependentBelongClass(String objectClassName) {
-        if (xmlNodeType == NODE_TYPE_ELEMENT_LIST)
+    protected void tobeDependentBelongClass(String objectClassName, List<String> subObjectClassNames) {
+        this.subObjectClassNames = subObjectClassNames;
+        if (xmlNodeType == NODE_TYPE_ELEMENT_LIST) {
             return;
-        this.objectClassName = objectClassName;
+        }
+        if (objectClassName != null) {
+            this.objectClassName = objectClassName;
+        }
+
         if (children != null) {
-            children.forEach(child -> child.tobeDependentBelongClass(objectClassName));
+            children.forEach(child -> child.tobeDependentBelongClass(objectClassName, subObjectClassNames));
         }
     }
 

@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -136,7 +137,7 @@ public class XmlProducer {
 
         List<Class<?>> detailClasses = subClasses.get(tableClass.getName());
         if (detailClasses != null) {
-            detailClasses.forEach(detailClass -> translateTable(detailClass, subClasses, xmlDataGetter));
+            detailClasses.forEach(detailClass -> translateTable(detailClass, subClasses, xmlDataGetter,new ArrayList<>()));
         }
 
         // 清理缓存
@@ -181,28 +182,29 @@ public class XmlProducer {
      * @param tableClass 子表类
      * @param subClasses 子类索引列表
      * @param xmlDataGetter 上级数据获取器
+     * @param subObjectClassNames 从属表级联降级关联类全限定名列表
      */
-    private void translateTable(Class<?> tableClass, HashMap<String, List<Class<?>>> subClasses, XmlDataGetter<?> xmlDataGetter) {
+    private XmlProducerNode translateTable(Class<?> tableClass, HashMap<String, List<Class<?>>> subClasses, XmlDataGetter<?> xmlDataGetter, List<String> subObjectClassNames) {
         // 处理子表主节点
         Table table = tableClass.getAnnotation(Table.class);
         String detailXmlPath = table.xmlName();
         boolean isDependent = table.isDependent();
         String[] detailXmlPathSegments = detailXmlPath.isEmpty() ? new String[0] : detailXmlPath.split(XNL_SEPARATOR);
-        XmlProducerNode detailNode ;
+        XmlProducerNode currentNode ;
         String tableNodeName = detailXmlPath.isEmpty()?"":detailXmlPathSegments[detailXmlPathSegments.length - 1];
         if (isDependent)
-            detailNode = new XmlProducerNode(tableNodeName, new ArrayList<>(),table.order()); // 非独立从表创建元素节点缓存,后续合并使用
+            currentNode = new XmlProducerNode(tableNodeName, new ArrayList<>(),table.order()); // 非独立从表创建元素节点缓存,后续合并使用
         else
-            detailNode = new XmlProducerNode(tableNodeName, new ArrayList<>(), tableClass.getName(),table.order()); // 独立表创建数组节点(兼容单行)
+            currentNode = new XmlProducerNode(tableNodeName, new ArrayList<>(), tableClass.getName(),table.order()); // 独立表创建数组节点(兼容单行)
 
         // 处理明细表子节点
         List<Field> fields = Arrays.asList(tableClass.getDeclaredFields());
-        fields.stream().map(field -> translateNode(tableClass, field, detailNode.getChildren(), detailNode.getCache())) // 生成子节点
-                .filter(Objects::nonNull).filter(nodes->isDependent).forEach(nodes->nodes.forEach(node->node.tobeDependentBelongClass(tableClass.getName()))); // 若从属子表 注入类型名
+        fields.stream().map(field -> translateNode(tableClass, field, currentNode.getChildren(), currentNode.getCache())) // 生成子节点
+                .filter(Objects::nonNull).filter(nodes->isDependent).forEach(nodes->nodes.forEach(node->node.tobeDependentBelongClass(tableClass.getName(), subObjectClassNames))); // 若从属子表 注入类型名 且压入上级从事子表缓存
         List<Class<?>> detailClasses = subClasses.get(tableClass.getName());
 
         // 将子表节点进行添加
-        NodeUtils.addChild(detailNode, detailXmlPathSegments, children, childNodeCache);
+        NodeUtils.addChild(currentNode, detailXmlPathSegments, children, childNodeCache);
 
 
         // 构造数据获取器
@@ -221,13 +223,24 @@ public class XmlProducer {
                 },
                 () -> {throw new RuntimeException("明细表" + tableClass.getName() + "无链接主键字段");}
         );
-
+        ArrayList<String> newSubObjectClassNames;
+        if (isDependent) {
+            newSubObjectClassNames = new ArrayList<>(subObjectClassNames);
+            newSubObjectClassNames.add(tableClass.getName());
+        } else {
+            newSubObjectClassNames = new ArrayList<>();
+        }
         // 处理明细表子数组节点
         XmlDataGetter<?> detailXmlDataGetter = new XmlDataGetter<>(tableClass.getName(), mainIdFieldName.get(), mainIdGetterMethod.get());
         xmlDataGetter.putChildGetter(tableClass.getName(), detailXmlDataGetter);
         if (detailClasses != null) {
-            detailClasses.forEach(detailClass -> translateTable(detailClass, subClasses, detailXmlDataGetter));
+            detailClasses.forEach(detailClass -> {
+                XmlProducerNode detailNode = translateTable(detailClass, subClasses, detailXmlDataGetter, newSubObjectClassNames);
+                // 追加压栈
+                detailNode.tobeDependentBelongClass(null, newSubObjectClassNames);
+            });
         }
+        return currentNode;
     }
 
     /**
@@ -250,8 +263,9 @@ public class XmlProducer {
                 String[] equalXmls = column.equalXml();
                 if (equalXmls !=null && equalXmls.length != 0) {
                     Arrays.stream(equalXmls).forEach(equalXml-> {
-                        String[] eqlXmlSplit = equalXml.split(XNL_SEPARATOR);
-                        XmlProducerNode equalNode = new XmlProducerNode(node, eqlXmlSplit[eqlXmlSplit.length - 1]);
+                        String[] split = equalXml.split(LINK_SEPARATOR);
+                        String[] eqlXmlSplit = split[0].split(XNL_SEPARATOR);
+                        XmlProducerNode equalNode = new XmlProducerNode(node, eqlXmlSplit[eqlXmlSplit.length - 1], Integer.parseInt(split[1]));
                         nodes.add(equalNode);
                         NodeUtils.addChild(equalNode, eqlXmlSplit, children, childNodeCache);
                     });
@@ -337,9 +351,9 @@ public class XmlProducer {
             while (Files.exists(path)) {
                 trial++;
                 fileName = baseFileName + "_" + trial;
-                path = Paths.get(NodeUtils.getInputFilePath() + fileName + ".xml");
+                path = Paths.get(NodeUtils.getInputFilePath() + fileName + ".xml" );
             }
-            Files.write(path, xmlText.getBytes());
+            Files.write(path, xmlText.getBytes(),StandardOpenOption.CREATE_NEW);
             return new XmlActionConsequence().setFileName(fileName).setContext(xmlText).setSuccess(true).setMainId(mainId.toString());
         } catch (Exception e) {
             throw new RuntimeException("xml文件生产失败", e);
