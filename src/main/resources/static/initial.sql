@@ -31,7 +31,9 @@ CREATE TABLE xml_log (
             -- 结果文件名称：可变字符串，长度255，允许为空
                                  answer_file VARCHAR(255) NULL,
             -- 结果文件内容：大文本类型，允许为空
-                                 answer_file_context VARCHAR(MAX) NULL
+                                 answer_file_context VARCHAR(MAX) NULL,
+            -- 结果时间：日期时间类型（对应实体类Date/LocalDateTime），允许为空
+                                 answer_date_time DATETIME NULL
         );
 -- 可选：为常用查询字段创建索引（提升查询效率，根据业务需求添加）
 CREATE INDEX idx_xml_log_main_id ON xml_log(main_id);

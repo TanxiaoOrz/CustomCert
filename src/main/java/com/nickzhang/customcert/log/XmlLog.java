@@ -1,4 +1,4 @@
-package com.nickzhang.customcert.po;
+package com.nickzhang.customcert.log;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -29,7 +29,7 @@ public class XmlLog {
      * 优化2：主键类型改为Long（对应数据库BIGINT自增，最常用）
      * 若数据库主键是VARCHAR类型，可改为String + IdType.ASSIGN_UUID/IdType.INPUT
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
@@ -76,4 +76,10 @@ public class XmlLog {
      * 结果文件内容
      */
     private String answerFileContext;
+     /**
+     * 结果时间
+     */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date answerDateTime;
 }

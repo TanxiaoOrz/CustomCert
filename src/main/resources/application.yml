@@ -5,12 +5,23 @@ spring:
       strict: false # 关闭严格模式，允许未匹配到数据源时使用主数据源（默认 false，可选保留）
       datasource:
         master:
-          url: jdbc:sqlserver://localhost:1433;databaseName=customcert;trustServerCertificate=true
+          url: jdbc:sqlserver://localhost:1433;databaseName=customcert;encrypt=false;trustServerCertificate=true
           username: zjs
           password: 1
           driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver # 驼峰命名，更规范
         pojo:
-          url: jdbc:sqlserver://localhost:1433;databaseName=RJECIQ;trustServerCertificate=true
+          url: jdbc:sqlserver://localhost:1433;databaseName=RJECIQ;encrypt=false;trustServerCertificate=true
           username: zjs
           password: 1
           driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver # 驼峰命名，更规范
+mybatis:
+  configuration:
+    useGeneratedKeys: true
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      db-type: sqlserver
+

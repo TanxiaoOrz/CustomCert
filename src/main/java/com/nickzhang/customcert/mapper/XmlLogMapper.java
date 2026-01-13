@@ -1,7 +1,7 @@
 package com.nickzhang.customcert.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.nickzhang.customcert.po.XmlLog;
+import com.nickzhang.customcert.log.XmlLog;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
