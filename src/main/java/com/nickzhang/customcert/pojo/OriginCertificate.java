@@ -46,7 +46,6 @@ public class OriginCertificate {
     /**
      * 证书状态
      */
-    @Column(xmlName = "CertificateHead/CertState", order = 3)
     @TableField(value = "Cert_State")
     private String certState;
 
@@ -140,7 +139,6 @@ public class OriginCertificate {
     /**
      * 申请地址代码
      */
-    @Column(xmlName = "CertificateHead/AplAddrCode")
     @TableField(value = "Apl_Addr_Code")
     private String aplAddrCode;
 
@@ -148,21 +146,18 @@ public class OriginCertificate {
     /**
      * 审核日期
      */
-    @Column(xmlName = "CertificateHead/CheckDate")
     @TableField(value = "Check_Date")
     private String checkDate;
 
     /**
      * 申报机构
      */
-    @Column(xmlName = "CertificateHead/OfficeDeclare")
     @TableField(value = "Office_Declare")
     private String officeDeclare;
 
     /**
      * 旧证书编号
      */
-    @Column(xmlName = "CertificateHead/OldCertNo")
     @TableField(value = "Old_Cert_No")
     private String oldCertNo;
 
@@ -183,7 +178,6 @@ public class OriginCertificate {
     /**
      * 旧证书日期
      */
-    @Column(xmlName = "CertificateHead/OldCertDate")
     @TableField(value = "Old_Cert_Date")
     private String oldCertDate;
 
@@ -198,7 +192,6 @@ public class OriginCertificate {
     /**
      * 条形码
      */
-    @Column(xmlName = "CertificateHead/BarCode")
     @TableField(value = "Bar_Code")
     private String barCode;
 
@@ -267,70 +260,60 @@ public class OriginCertificate {
     /**
      * 机构英文名称
      */
-    @Column(xmlName = "CertificateHead/OrgNameE")
     @TableField(value = "Org_Name_E")
     private String orgNameE;
 
     /**
      * 审核地址
      */
-    @Column(xmlName = "CertificateHead/CheckAddress")
     @TableField(value = "Check_Address")
     private String checkAddress;
 
     /**
-     * 英文地址
+     * 英文地址 冗余字段
      */
-    @Column(xmlName = "CertificateHead/AddressEn")
     @TableField(value = "Address_En")
     private String addressEn;
 
     /**
      * 机构电话
      */
-    @Column(xmlName = "CertificateHead/OrgTel")
     @TableField(value = "Org_Tel")
     private String orgTel;
 
     /**
      * 机构传真
      */
-    @Column(xmlName = "CertificateHead/OrgFax")
     @TableField(value = "Org_Fax")
     private String orgFax;
 
     /**
      * 指纹发送状态
      */
-    @Column(xmlName = "CertificateHead/FingerprintSend")
     @TableField(value = "Fingerprint_Send")
     private String fingerprintSend;
 
     /**
      * 指纹接收状态
      */
-    @Column(xmlName = "CertificateHead/FingerprintReceive")
     @TableField(value = "Fingerprint_Receive")
     private String fingerprintReceive;
 
     /**
      * 指纹打印状态
      */
-    @Column(xmlName = "CertificateHead/FingerprintPrint")
     @TableField(value = "Fingerprint_Print")
     private String fingerprintPrint;
 
     /**
      * 有效标识
      */
-    @Column(xmlName = "CertificateHead/ValidFlag")
     @TableField(value = "Valid_Flag")
     private String validFlag;
 
     /**
      * 锁定标识
      */
-    @Column(xmlName = "CertificateHead/LockFlag")
     @TableField(value = "Lock_Flag")
     private String lockFlag;
 
@@ -358,7 +341,7 @@ public class OriginCertificate {
     /**
      * 第三方发票标识
      */
-    @Column(xmlName = "CertificateHead/ThirdInvFlag")
+    @Column(xmlName = "CertificateHead/ThirdPartyInvFlag")
     @TableField(value = "Third_Inv_Flag")
     private String thirdInvFlag;
 
@@ -427,91 +410,78 @@ public class OriginCertificate {
     /**
      * 最终审核日期
      */
-    @Column(xmlName = "CertificateHead/EndCheckDate")
     @TableField(value = "End_Check_Date")
     private String endCheckDate;
 
     /**
      * 指纹版本
      */
-    @Column(xmlName = "CertificateHead/FingerprintVersion")
     @TableField(value = "Fingerprint_Version")
     private String fingerprintVersion;
 
     /**
      * 发送时间
      */
-    @Column(xmlName = "CertificateHead/SendTime")
     @TableField(value = "Send_Time")
     private String sendTime;
 
     /**
      * 算法版本
      */
-    @Column(xmlName = "CertificateHead/ArithmeticVersion")
     @TableField(value = "Arithmetic_Version")
     private String arithmeticVersion;
 
     /**
      * 打印视图
      */
-    @Column(xmlName = "CertificateHead/PrintViews")
     @TableField(value = "Print_Views")
     private String printViews;
 
     /**
      * 企业申报编号
      */
-    @Column(xmlName = "CertificateHead/EntDeclareNo")
     @TableField(value = "Ent_Declare_No")
     private String entDeclareNo;
 
     /**
      * 模块ID
      */
-    @Column(xmlName = "CertificateHead/ModuleId")
     @TableField(value = "Module_Id")
     private String moduleId;
 
     /**
      * 单据状态
      */
-    @Column(xmlName = "CertificateHead/BillStatus")
     @TableField(value = "Bill_Status")
     private String billStatus;
 
     /**
      * 上传状态
      */
-    @Column(xmlName = "CertificateHead/UploadStatus")
     @TableField(value = "Upload_Status")
     private String uploadStatus;
 
     /**
      * 用户ID
      */
-    @Column(xmlName = "CertificateHead/UserId")
     @TableField(value = "User_Id")
     private String userId;
 
     /**
      * 操作时间
      */
-    @Column(xmlName = "CertificateHead/OperTime")
     @TableField(value = "Oper_Time")
     private String operTime;
 
     /**
      * 数据来源
      */
-    @Column(xmlName = "CertificateHead/DataSource")
     @TableField(value = "Data_Source")
     private String dataSource;
 
     /**
      * 验证码
      */
-    @Column(xmlName = "CertificateHead/VerifyCode")
     @TableField(value = "Verify_Code")
     private String verifyCode;
 
@@ -525,7 +495,6 @@ public class OriginCertificate {
     /**
      * 出口状态
      */
-    @Column(xmlName = "CertificateHead/ExportState")
     @TableField(value = "Export_State")
     private String exportState;
 
@@ -533,7 +502,6 @@ public class OriginCertificate {
     /**
      * 三证合一注册号
      */
-    @Column(xmlName = "CertificateHead/ThreeCorpRegNo")
     @TableField(value = "Three_Corp_Reg_No")
     private String threeCorpRegNo;
 
@@ -591,4 +559,11 @@ public class OriginCertificate {
     @Column(xmlName = "AplPromise/AplPromiseCode")
     @TableField(value = "Apl_Promise_Code")
     private String aplPromiseCode;
+
+     /**
+     * 生产企业是否有保密证书
+     */
+     @Column(xmlName = "AplPromise/ProducerSertFlag")
+    @TableField(exist = false)
+    private String producerSertFlag;
 }

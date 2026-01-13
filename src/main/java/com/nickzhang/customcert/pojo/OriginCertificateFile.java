@@ -12,13 +12,13 @@ import com.baomidou.mybatisplus.annotation.TableName;
  * @Date: 2026/1/11 20:53
  * @PackageName: com.nickzhang.customcert.pojo
  * @ClassName: OriginCertificateFile
- * @Description: TODO
+ * @Description: 海关原产地附件实体类
  * @Version: 1.0
  */
 @Data
 @TableName(value = "Ori_B_DocumentAttach") // 新规则：映射数据库完整原始表名
 @Table(xmlName = "File",
-        belongTo = OriginCertificate.class, dividedFile = true) // xmlName指定为XML核心节点File
+        belongTo = OriginCertificate.class, dividedFile = true,showName = "海关原产地附件") // xmlName指定为XML核心节点File
 public class OriginCertificateFile {
 
     /**
@@ -70,6 +70,14 @@ public class OriginCertificateFile {
     @Column(xmlName = "FileName", order = 5) // 精准匹配XML节点FileName
     @TableField(value = "File_Name")
     private String fileName;
+
+    /**
+     * 获取附件名字（对应XML节点FileName）
+     * 优化：移除文件名中的空格，避免XML解析错误
+     */
+    public String getFileName() {
+        return fileName.replace(" ", "");
+    }
 
     /**
      * 附件类型（对应XML节点FileType）

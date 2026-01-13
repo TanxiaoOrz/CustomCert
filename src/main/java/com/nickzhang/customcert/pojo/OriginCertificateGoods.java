@@ -46,7 +46,6 @@ public class OriginCertificateGoods {
     /**
      * 证书种类
      */
-    @Column(xmlName = "CertKind")
     @TableField(value = "Cert_Kind")
     private String certKind;
 
@@ -86,9 +85,9 @@ public class OriginCertificateGoods {
     private String goodsQuantity;
 
     /**
-     * 货物单位
+     * 货物单位（英文）
      */
-    @Column(xmlName = "GoodsUnit")
+    @Column(xmlName = "GoodsUnitE")
     @TableField(value = "Goods_Unit")
     private String goodsUnit;
 
@@ -102,7 +101,6 @@ public class OriginCertificateGoods {
     /**
      * 币种代码
      */
-    @Column(xmlName = "Ccy")
     @TableField(value = "Ccy")
     private String ccy;
 
@@ -116,7 +114,7 @@ public class OriginCertificateGoods {
     /**
      * 原产地标准
      */
-    @Column(xmlName = "OriginCriteria")
+    @Column(xmlName = "OriCriteria")
     @TableField(value = "Origin_Criteria")
     private String originCriteria;
 
@@ -165,7 +163,7 @@ public class OriginCertificateGoods {
     /**
      * 重量单位
      */
-    @Column(xmlName = "WeightUnit")
+    @Column(xmlName = "WUnit")
     @TableField(value = "Weight_Unit")
     private String weightUnit;
 
@@ -200,28 +198,25 @@ public class OriginCertificateGoods {
     /**
      * 生产厂家
      */
-    @Column(xmlName = "Manufacture")
     @TableField(value = "Manufacture")
     private String manufacture;
 
     /**
      * 联系人
      */
-    @Column(xmlName = "Contactor")
     @TableField(value = "Contactor")
     private String contactor;
 
     /**
-     * 联系电话
+     * 生产商电话
      */
-    @Column(xmlName = "Tel")
+    @Column(xmlName = "PrdcEtpsTel")
     @TableField(value = "Tel")
     private String tel;
 
     /**
      * 打印编号
      */
-    @Column(xmlName = "PrintNo")
     @TableField(value = "Print_No")
     private String printNo;
 
@@ -235,7 +230,6 @@ public class OriginCertificateGoods {
     /**
      * 申请货物标准
      */
-    @Column(xmlName = "AplGoodsCriteria")
     @TableField(value = "Apl_Goods_Criteria")
     private String aplGoodsCriteria;
 
@@ -249,14 +243,12 @@ public class OriginCertificateGoods {
     /**
      * 申报编号
      */
-    @Column(xmlName = "DeclNo")
     @TableField(value = "Decl_No")
     private String declNo;
 
     /**
      * 许可证编号
      */
-    @Column(xmlName = "LicenseNo")
     @TableField(value = "License_No")
     private String licenseNo;
 
@@ -284,7 +276,7 @@ public class OriginCertificateGoods {
     /**
      * 货物单位（中文）
      */
-    @Column(xmlName = "GoodsUnitCn")
+    @Column(xmlName = "GoodsUnit")
     @TableField(value = "Goods_Unit_Cn")
     private String goodsUnitCn;
 
@@ -326,14 +318,12 @@ public class OriginCertificateGoods {
     /**
      * 原产地标准补充
      */
-    @Column(xmlName = "OriginCriteriaReplenish")
     @TableField(value = "Origin_Criteria_Replenish")
     private String originCriteriaReplenish;
 
     /**
      * 原产地标准单独项
      */
-    @Column(xmlName = "OriginCriteriaAlone")
     @TableField(value = "Origin_Criteria_Alone")
     private String originCriteriaAlone;
 
@@ -357,5 +347,50 @@ public class OriginCertificateGoods {
     @Column(xmlName = "SecdGoodsUnitRef")
     @TableField(value = "SecdGoods_UnitRef")
     private String secdGoodsUnitRef;
+
+    /**
+     * 是否货物项标识 Y N
+     */
+    @Column(xmlName = "GoodsItemFlag")
+    @TableField(exist = false)
+    private String goodsItemFlag;
+
+    public String getGoodsItemFlag() {
+        if (hsCode == null || hsCode.isEmpty()) {
+            return "Y";
+        }
+        return "N";
+    }
+
+    /**
+     * 发票单价（InvPrice） 缺失的非必填字段
+     */
+    @Column(xmlName = "InvPrice")
+    @TableField(exist = false)
+    private String invPrice;
+
+    @SuppressWarnings("unused")
+    public String getInvPrice() {
+        if (invPrice == null || invPrice.isEmpty()) {
+            return "";
+        }
+        return invPrice;
+    }
+
+    /**
+     * 生产商电话 缺失的非必填字段
+     */
+    @Column(xmlName = "ProducerTel")
+    @TableField(exist = false)
+    private String producerTel;
+
+    @SuppressWarnings("unused")
+     public String getProducerTel() {
+        if (producerTel == null || producerTel.isEmpty()) {
+            return "";
+        }
+        return producerTel;
+    }
+
 
 }

@@ -90,7 +90,6 @@ public class OriginCertificateApl {
     /**
      * 拟出口日期时间
      */
-    @Column(xmlName = "IntendExpDatetime")
     @TableField(value = "Intend_Exp_Datetime")
     private String intendExpDatetime;
 
@@ -118,7 +117,6 @@ public class OriginCertificateApl {
     /**
      * 贸易方式名称
      */
-    @Column(xmlName = "TradeModeName")
     @TableField(value = "Trade_Mode_Name")
     private String tradeModeName;
 
@@ -129,7 +127,6 @@ public class OriginCertificateApl {
     /**
      * 申请日期时间
      */
-    @Column(xmlName = "ApplyDateTime")
     @TableField(value = "Apply_Date_Time")
     private String applyDateTime;
 
@@ -170,7 +167,6 @@ public class OriginCertificateApl {
     /**
      * 领取地点名称
      */
-    @Column(xmlName = "FetchPlaceName")
     @TableField(value = "Fetch_Place_Name")
     private String fetchPlaceName;
 
@@ -179,7 +175,6 @@ public class OriginCertificateApl {
     /**
      * 发送方参考号
      */
-    @Column(xmlName = "SenderReference")
     @TableField(value = "Sender_Reference")
     private String senderReference;
 
@@ -200,14 +195,12 @@ public class OriginCertificateApl {
     /**
      * 联系人
      */
-    @Column(xmlName = "Contactor")
     @TableField(value = "Contactor")
     private String contactor;
 
     /**
      * 联系电话
      */
-    @Column(xmlName = "Tel")
     @TableField(value = "Tel")
     private String tel;
 
@@ -216,21 +209,18 @@ public class OriginCertificateApl {
     /**
      * 不可重做标识
      */
-    @Column(xmlName = "UnRedoFlag")
     @TableField(value = "Un_Redo_Flag")
     private String unRedoFlag;
 
     /**
      * 汇总标识
      */
-    @Column(xmlName = "ComulationFlag")
     @TableField(value = "Comulation_Flag")
     private String comulationFlag;
 
     /**
      * 证书标识
      */
-    @Column(xmlName = "CertFlag")
     @TableField(value = "Cert_Flag")
     private String certFlag;
 
