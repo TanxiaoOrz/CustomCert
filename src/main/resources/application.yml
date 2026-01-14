@@ -33,4 +33,25 @@ springdoc:
     enabled: true  # 启用Swagger UI
     tags-sorter: alpha  # 标签排序方式,alpha表示按字母排序
     operations-sorter: alpha  # 操作排序方式
-  show-actuator: true  # 是否显示Actuator端点,默认false
+  show-actuator: false  # 是否显示Actuator端点,默认false
+
+# Knife4j配置
+knife4j:
+  # 开启增强配置
+#  enable: true
+  #开启Basic登录认证功能
+  setting:
+    language: zh_cn  # 界面语言,zh_cn表示中文
+    swagger-model-name: 实体类  # 实体类名称显示
+    title: zjs的海关单据生成文档
+    description: 临时试用版
+    email: 13671985248@163.com
+    concat: 张骏山  # 作者
+    url: https://github.com/Tanxiao_Orz/CustomCert
+    version: v1.0 # 版本号
+  production: false  # 是否开启生产环境保护策略,生产环境建议设置为true
+
+#  basic:
+#    enable: false  # 是否启用Basic认证,默认false
+#    username: admin  # Basic认证用户名
+#    password: 123456  # Basic认证密码
