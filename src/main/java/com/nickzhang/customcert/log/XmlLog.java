@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,6 +22,7 @@ import java.util.Date;
 @Data
 @Accessors(chain = true)
 @TableName(value = "Xml_Log")
+@Schema(description = "推送日志")
 public class XmlLog {
 
     /**
@@ -30,34 +32,44 @@ public class XmlLog {
      * 若数据库主键是VARCHAR类型，可改为String + IdType.ASSIGN_UUID/IdType.INPUT
      */
     @TableId(type = IdType.ASSIGN_ID)
+    @Schema(description = "用户ID")
     private Long id;
 
     /**
      * 类型展示名称
      */
+    @Schema(description = "类型展示名称")
     private String typeName;
-
-
 
     /**
      * 主ID
      */
+    @Schema(description = "主ID")
     private String mainId;
+
+     /**
+     * 文件路径根目录
+     */
+    @Schema(description = "文件路径根目录")
+    private String filePathRoot;
 
     /**
      * 输入文件名称
      */
+    @Schema(description = "输入文件名称")
     private String inputFile;
 
     /**
      * 输入文件内容
      */
+    @Schema(description = "输入文件内容")
     private String inputFileContext;
 
     /**
      * 输入时间
      * 优化：添加日期格式化注解，解决映射和序列化问题
      */
+    @Schema(description = "输入时间")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date inputDateTime;
@@ -65,20 +77,24 @@ public class XmlLog {
     /**
      * 处理状态
      */
+    @Schema(description = "处理状态")
     private String status;
 
     /**
      * 结果文件名称
      */
+    @Schema(description = "结果文件名称")
     private String answerFile;
 
     /**
      * 结果文件内容
      */
+    @Schema(description = "结果文件内容")
     private String answerFileContext;
      /**
      * 结果时间
      */
+    @Schema(description = "结果时间")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date answerDateTime;

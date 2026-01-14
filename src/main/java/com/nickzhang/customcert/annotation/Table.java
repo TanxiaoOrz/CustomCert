@@ -59,4 +59,9 @@ public @interface Table {
       */
     int order() default 999;
 
+     /**
+      * 文件路径
+      */
+    String filePath() default "";
+
 }

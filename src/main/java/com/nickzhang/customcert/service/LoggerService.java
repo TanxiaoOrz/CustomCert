@@ -38,7 +38,7 @@ public class LoggerService {
 
     private final XmlLogMapper xmlLogMapper;
 
-    @Value("${front-end-processor.file-path.concequense}")
+    @Value("${front-end-processor.file-path.consequence}")
     private String consequencePath;
     @Value("${front-end-processor.answer-prefix.success}")
     private String successPrefix;
@@ -58,7 +58,9 @@ public class LoggerService {
                 .setInputFile(xmlActionConsequence.getFileName())
                 .setInputFileContext(xmlActionConsequence.getContext())
                 .setInputDateTime(new Date())
-                .setStatus(XmlLogStatus.wait.toString())).toList();
+                .setStatus(XmlLogStatus.wait.toString())
+                .setFilePathRoot(xmlActionConsequence.getFilePath())
+        ).toList();
 
 
         xmlLogMapper.insert(xmlLogs);
@@ -72,19 +74,35 @@ public class LoggerService {
      * @return 结果数量 {成功, 失败, 待查询}
      */
     public List<Long> checkReturn(String showName) {
-        List<XmlLog> xmlLogs;
         // 按处理状态筛选 待查询
-        LambdaQueryWrapper<XmlLog> wrapper = new LambdaQueryWrapper<XmlLog>().eq(XmlLog::getStatus, XmlLogStatus.wait.name()).orderByAsc(XmlLog::getInputDateTime);
-
-        // 按操作对象名称筛选 空值代表全选
-        if (showName != null && !showName.isEmpty()) {
-            wrapper.eq(XmlLog::getTypeName, showName);
+        if (showName == null ||showName.isEmpty()) {
+            Long[] rts = new Long[]{0L, 0L, 0L};
+            xmlLogMapper.selectList(new LambdaQueryWrapper<XmlLog>()
+                    .eq(XmlLog::getStatus, XmlLogStatus.wait.name())
+                    .groupBy(XmlLog::getTypeName)
+            ).forEach(xmlLog -> {
+                List<Long> longs = checkReturn(xmlLog.getTypeName());
+                rts[0] += longs.get(0);
+                rts[1] += longs.get(1);
+                rts[2] += longs.get(2);
+            });
+            return new ArrayList<>(Arrays.asList(rts));
         }
-        xmlLogs = xmlLogMapper.selectList(wrapper);
+        List<XmlLog> xmlLogs;
+
+        // 按操作对象名称筛选 空值代
+        xmlLogs = xmlLogMapper.selectList(new LambdaQueryWrapper<XmlLog>()
+                .eq(XmlLog::getStatus, XmlLogStatus.wait.name())
+                .eq(XmlLog::getTypeName, showName)
+                .orderByAsc(XmlLog::getInputDateTime));
         logger.info("待查询结果数据{}", xmlLogs);
 
+        if (xmlLogs.isEmpty()) {
+            return new ArrayList<>(Arrays.asList(0L, 0L, 0L));
+        }
+
         // 从文件系统加载所有结果文件
-        List<Resource> answerFiles = getAnswerFileNames();
+        List<Resource> answerFiles = getAnswerFileNames(xmlLogs.get(0).getFilePathRoot());
         Long[] consequence = new Long[]{0L, 0L, 0L};
 
         xmlLogs.forEach(xmlLog -> {
@@ -163,13 +181,13 @@ public class LoggerService {
         }
     }
 
-    private List<Resource> getAnswerFileNames() {
+    private List<Resource> getAnswerFileNames(String filePathRoot) {
         ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
 
         Resource[] resources;
         // 3. 解析目录，获取所有资源对象
         try {
-            resources = resourceResolver.getResources(consequencePath + "*.xml");
+            resources = resourceResolver.getResources(filePathRoot + consequencePath + "*.xml");
         } catch (IOException e) {
             throw new RuntimeException("获取操作结果文件失败", e);
         }

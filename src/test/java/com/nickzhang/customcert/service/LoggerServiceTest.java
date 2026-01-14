@@ -25,7 +25,7 @@ public class LoggerServiceTest {
 
     @Test
     public void writeTest() {
-        List<XmlActionConsequence> result = xmlService.generateXmlText("海关原产地证书", "bcf0002b7c604f51967b10791c9bd2cf");
+        List<XmlActionConsequence> result = xmlService.generateXmlText("海关原产地证书", "c9bd38bdde764b4192574afbddb7109e");
         loggerService.writeXmlLog(result);
     }
 }

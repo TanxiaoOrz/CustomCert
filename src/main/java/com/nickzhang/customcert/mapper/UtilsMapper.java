@@ -1,5 +1,6 @@
 package com.nickzhang.customcert.mapper;
 
+import com.nickzhang.customcert.xml.ClassNoInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -40,4 +41,12 @@ public interface UtilsMapper {
      */
     @Select("select ${belongTable}.${belongTableMainColumn} from ${belongTable} right join ${mainTable} on ${belongTable}.${belongLinkColumn} = ${mainTable}.${mainLinkColumn} where ${mainTable}.${mainLinkColumn} = #{mainId}")
     List<String> getBelongTableIds(String mainTable, String belongTable, String mainTableMainId, String mainLinkColumn, String belongTableMainColumn, String belongLinkColumn, String mainId);
+
+     /**
+      * 根据编号获取主表主键值
+      * @param classNoInfo 编号值
+      * @return 主表主键值
+      */
+     @Select("select ${mainColumn} from ${mainTable} where ${noColumn} = #{no}")
+     String getIdFromNo(ClassNoInfo classNoInfo,String no);
 }

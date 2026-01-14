@@ -1,5 +1,6 @@
 package com.nickzhang.customcert.pojo;
 
+import com.baomidou.mybatisplus.annotation.OrderBy;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -43,6 +44,7 @@ public class OriginCertificateGoods {
      */
     @Column(xmlName = "") // 保留原始空白配置，不修改
     @TableField(value = "Cert_No")
+    @OrderBy(asc = true)
     private String certNo;
 
     /**

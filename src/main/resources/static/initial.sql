@@ -20,6 +20,8 @@ CREATE TABLE xml_log (
                          type_name VARCHAR(50) NULL,
     -- 主ID：可变字符串，长度64（适配常见唯一标识长度），允许为空
                          main_id VARCHAR(64) NULL,
+    -- 文件路径根目录：可变字符串，长度255（适配文件路径/名称长度），允许为空
+                         file_path_root VARCHAR(255) NULL,
     -- 输入文件名称：可变字符串，长度255（适配文件路径/名称长度），允许为空
                          input_file VARCHAR(255) NULL,
     -- 输入文件内容：大文本类型（若内容较长，推荐用VARCHAR(MAX)），允许为空

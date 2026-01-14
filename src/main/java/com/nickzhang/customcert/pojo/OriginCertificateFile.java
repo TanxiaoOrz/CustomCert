@@ -18,7 +18,11 @@ import com.baomidou.mybatisplus.annotation.TableName;
 @Data
 @TableName(value = "Ori_B_DocumentAttach") // 新规则：映射数据库完整原始表名
 @Table(xmlName = "File",
-        belongTo = OriginCertificate.class, dividedFile = true,showName = "海关原产地附件") // xmlName指定为XML核心节点File
+        belongTo = OriginCertificate.class,
+        dividedFile = true,
+        showName = "海关原产地附件",
+        filePath = "CooFile/"
+) // xmlName指定为XML核心节点File
 public class OriginCertificateFile {
 
     /**
@@ -67,7 +71,7 @@ public class OriginCertificateFile {
     /**
      * 附件名字（对应XML节点FileName）
      */
-    @Column(xmlName = "FileName", order = 5) // 精准匹配XML节点FileName
+    @Column(xmlName = "FileName", order = 6) // 精准匹配XML节点FileName
     @TableField(value = "File_Name")
     private String fileName;
 
@@ -82,7 +86,7 @@ public class OriginCertificateFile {
     /**
      * 附件类型（对应XML节点FileType）
      */
-    @Column(xmlName = "FileType", order = 6) // 精准匹配XML节点FileType
+    @Column(xmlName = "FileType", order = 5) // 精准匹配XML节点FileType
     @TableField(value = "File_Type")
     private String fileType;
 

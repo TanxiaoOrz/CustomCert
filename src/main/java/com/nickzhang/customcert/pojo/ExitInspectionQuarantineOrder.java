@@ -47,7 +47,7 @@ public class ExitInspectionQuarantineOrder {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Decl_No")
-    @Column(xmlName = "")
+    @Column(xmlName = "" ,isNo = true)
     private String declNo;
 
     /**

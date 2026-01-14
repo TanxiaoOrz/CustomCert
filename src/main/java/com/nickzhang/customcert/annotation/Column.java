@@ -1,6 +1,7 @@
 package com.nickzhang.customcert.annotation;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.nickzhang.customcert.data.ColumnType;
 import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.ElementType;
@@ -75,4 +76,18 @@ public @interface Column {
       * @example: {"xmlNode1-order1","xmlNode2-order2"}
       */
     String[] equalXml() default {};
+    /**
+     * 列表显示名称
+     */
+    String showName() default "";
+
+    /**
+     * 是否是编号字段
+     */
+    boolean isNo() default false;
+
+    /**
+     * 字段类型
+     */
+    ColumnType fieldType() default ColumnType.String;
 }

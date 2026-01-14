@@ -19,7 +19,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 @Table(xmlName = "Certificate",
         showName = "海关原产地证书",
         schemaLocation = "http://www.w3.org/2000/09/xmldsig# coo%20(1).xsd",
-        nameSpaces = {"","http://www.w3.org/2000/09/xmldsig#","xsi","http://www.w3.org/2001/XMLSchema-instance"}
+        nameSpaces = {"","http://www.w3.org/2000/09/xmldsig#","xsi","http://www.w3.org/2001/XMLSchema-instance"},
+        filePath = "CooImp/"
 ) // 自定义@Table注解，保留表名与XML节点映射
 public class OriginCertificate {
 
@@ -34,7 +35,7 @@ public class OriginCertificate {
     /**
      * 证书编号
      */
-    @Column(xmlName = "CertificateHead/CertNo",order = 1) // 保留原有配置，order匹配XML顺序
+    @Column(xmlName = "CertificateHead/CertNo",order = 1,listShow = true, searchShow = true,isNo = true) // 保留原有配置，order匹配XML顺序
     @TableField(value = "Cert_No")
     private String certNo;
 

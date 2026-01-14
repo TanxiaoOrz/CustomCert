@@ -1,27 +1,34 @@
 spring:
   datasource:
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 10
+      max-lifetime: 600000
     dynamic:
       primary: master # 显式指定主数据源为 master（与下方数据源名称匹配）
       strict: false # 关闭严格模式，允许未匹配到数据源时使用主数据源（默认 false，可选保留）
       datasource:
         master:
-          url: jdbc:sqlserver://localhost:1433;databaseName=customcert;encrypt=false;trustServerCertificate=true
+          url: jdbc:sqlserver://192.168.43.88:1433;databaseName=customcert;encrypt=false
           username: zjs
           password: 1
           driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver # 驼峰命名，更规范
         pojo:
-          url: jdbc:sqlserver://localhost:1433;databaseName=RJECIQ;encrypt=false;trustServerCertificate=true
+          url: jdbc:sqlserver://192.168.43.88:1433;databaseName=RJECIQ;encrypt=false
           username: zjs
           password: 1
           driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver # 驼峰命名，更规范
 mybatis:
   configuration:
     useGeneratedKeys: true
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  global-config:
-    db-config:
-      id-type: auto
-      db-type: sqlserver
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs  # OpenAPI JSON文档路径,默认就是/v3/api-docs
+    enabled: true  # 启用API文档生成
+  swagger-ui:
+    path: /swagger-ui.html  # Swagger UI访问路径,默认是/swagger-ui.html
+    enabled: true  # 启用Swagger UI
+    tags-sorter: alpha  # 标签排序方式,alpha表示按字母排序
+    operations-sorter: alpha  # 操作排序方式
+  show-actuator: false  # 是否显示Actuator端点,默认false

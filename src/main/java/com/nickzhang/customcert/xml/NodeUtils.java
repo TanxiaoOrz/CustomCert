@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -48,6 +46,19 @@ public class NodeUtils implements InitializingBean {
      */
     @Value("${front-end-processor.file-path.failure}")
     private String failureFilePath;
+    /**
+     * 结果文件路径
+     */
+    @Value("${front-end-processor.file-path.consequence}")
+    private String concequenseFilePath;
+    /**
+     * 文件路径根目录
+     */
+    @Value("${front-end-processor.file-path.root}")
+    private String filePathRoot;
+
+
+
 
     public static String getInputFilePath() {
         return instance.inputFilePath;
@@ -58,49 +69,13 @@ public class NodeUtils implements InitializingBean {
      public static String getFailureFilePath() {
         return instance.failureFilePath;
     }
-
-
-
-    /**
-     * 根据字段获取对应的 get/is 方法
-     * @param clazz 字段所属的类
-     * @param field 目标字段
-     * @return 对应的 get/is 方法（无则返回 null）
-     */
-    public static Method getGetterMethod(Class<?> clazz, Field field) {
-        if (clazz == null || field == null) {
-            return null;
-        }
-
-        String fieldName = field.getName();
-
-        return getGetterMethod(clazz, fieldName);
+    public static String getConcequenseFilePath() {
+        return instance.concequenseFilePath;
+    }
+    public static String getFilePathRoot() {
+        return instance.filePathRoot;
     }
 
-    /**
-     * 根据字段名获取对应的 get/is 方法
-     * @param clazz 字段所属的类
-     * @param fieldName 目标字段名
-     * @return 对应的 get/is 方法（无则返回 null）
-     */
-    public static Method getGetterMethod(Class<?> clazz, String fieldName) {
-        String methodName;
-            // 布尔类型优先拼接 isXXX，兼容 getXXX
-            methodName = "is" + capitalizeFirstLetter(fieldName);
-            Method method;
-            try {
-                method = clazz.getMethod(methodName);
-            } catch (NoSuchMethodException e) {
-                // 布尔类型不存在 isXXX 方法，尝试 getXXX
-                methodName = "get" + capitalizeFirstLetter(fieldName);
-                try {
-                    method = clazz.getMethod(methodName);
-                } catch (NoSuchMethodException e1) {
-                    throw new RuntimeException("xml生成解析器失败,类 " + clazz.getName() + " 中不存在方法 " + methodName, e1);
-                }
-            }
-            return method;
-    }
 
     /**
      * 首字母大写（处理字段名首字母小写的情况）

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nickzhang.customcert.annotation.Column;
 import com.nickzhang.customcert.annotation.Table;
 import com.nickzhang.customcert.mapper.UtilsMapper;
+import com.nickzhang.customcert.utils.ClassUtils;
 import lombok.Getter;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -13,7 +14,6 @@ import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 
-import java.io.FileOutputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -36,6 +36,11 @@ import static com.nickzhang.customcert.annotation.Column.XNL_SEPARATOR;
  * @Version: 1.0
  */
 public class XmlProducer {
+
+    /**
+     * 类文件路径
+     */
+    private String classFilePath;
     /**
      * 子节点列表
      */
@@ -117,7 +122,7 @@ public class XmlProducer {
 
         Table mainTable = tableClass.getAnnotation(Table.class);
         typeName = mainTable.showName();
-
+        classFilePath = mainTable.filePath();
         schemaLocation = mainTable.schemaLocation();
         String[] nameSpaces = mainTable.nameSpaces();
         for (int i = 0; i < nameSpaces.length ; i += 2) {
@@ -130,7 +135,7 @@ public class XmlProducer {
         Field[] mainTableFields = tableClass.getDeclaredFields();
         Arrays.stream(mainTableFields).forEach(field -> translateNode(tableClass, field, children, childNodeCache));
         Arrays.stream(mainTableFields).filter(field -> field.isAnnotationPresent(TableId.class)).findFirst().ifPresent(field -> {
-            getMainIdMethod = NodeUtils.getGetterMethod(tableClass, field);
+            getMainIdMethod = ClassUtils.getGetterMethod(tableClass, field);
         });
 
 
@@ -218,7 +223,7 @@ public class XmlProducer {
             return annotation.joinKey();
         }).findFirst().ifPresentOrElse(
                 field -> {
-                    mainIdGetterMethod.set(NodeUtils.getGetterMethod(table.belongTo(), field.getAnnotation(Column.class).joinColumn()));
+                    mainIdGetterMethod.set(ClassUtils.getGetterMethod(table.belongTo(), field.getAnnotation(Column.class).joinColumn()));
                     mainIdFieldName.set(field.getAnnotation(TableField.class).value());
                 },
                 () -> {throw new RuntimeException("明细表" + tableClass.getName() + "无链接主键字段");}
@@ -292,7 +297,7 @@ public class XmlProducer {
         if (!defaultValue.isEmpty()) { // 固定值
             node = new XmlProducerNode(NodeUtils.getLastSegmentAfterSlash(xmlName), defaultValue, column.order());
         } else if (linkTableColumn.isEmpty()) { // 文本字段
-            node = new XmlProducerNode(NodeUtils.getLastSegmentAfterSlash(xmlName), NodeUtils.getGetterMethod(detailClass, field), column.order());
+            node = new XmlProducerNode(NodeUtils.getLastSegmentAfterSlash(xmlName), ClassUtils.getGetterMethod(detailClass, field), column.order());
         } else { // 关联浏览字段
             String linkTableMainColumn;
             String linkTableName;
@@ -305,7 +310,7 @@ public class XmlProducer {
             } catch (ArrayIndexOutOfBoundsException e) {
                 throw new RuntimeException("关联浏览字段配置错误，格式为：关联表名-关联表显示字段[-主建id]}", e);
             }
-            node = new XmlProducerNode(NodeUtils.getLastSegmentAfterSlash(xmlName), NodeUtils.getGetterMethod(detailClass, field),
+            node = new XmlProducerNode(NodeUtils.getLastSegmentAfterSlash(xmlName), ClassUtils.getGetterMethod(detailClass, field),
                     linkTableName, linkTableMainColumn, linkTableColumnShow, column.order());
         }
         return node;
@@ -345,16 +350,21 @@ public class XmlProducer {
             xmlWriter.write(document);
             xmlWriter.close();
             String xmlText = writer.toString().replace(" xmlns=\"\"", "").replaceAll("(?m)^[ \\t]*\\r?\\n", "");
-            Path path = Paths.get(NodeUtils.getInputFilePath() + baseFileName + ".xml");
+            Path path = Paths.get( NodeUtils.getFilePathRoot() + classFilePath+NodeUtils.getInputFilePath()  + baseFileName + ".xml");
             int trial = 0;
             String fileName = baseFileName;
             while (Files.exists(path)) {
                 trial++;
                 fileName = baseFileName + "_" + trial;
-                path = Paths.get(NodeUtils.getInputFilePath() + fileName + ".xml" );
+                path = Paths.get(NodeUtils.getFilePathRoot() + classFilePath + NodeUtils.getInputFilePath() + fileName + ".xml" );
             }
             Files.write(path, xmlText.getBytes(),StandardOpenOption.CREATE_NEW);
-            return new XmlActionConsequence().setFileName(fileName).setContext(xmlText).setSuccess(true).setMainId(mainId.toString());
+            return new XmlActionConsequence()
+                    .setFileName(fileName)
+                    .setFilePath(NodeUtils.getFilePathRoot() + classFilePath)
+                    .setContext(xmlText)
+                    .setSuccess(true)
+                    .setMainId(mainId.toString());
         } catch (Exception e) {
             throw new RuntimeException("xml文件生产失败", e);
         }

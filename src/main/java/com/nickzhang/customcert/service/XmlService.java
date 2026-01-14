@@ -9,6 +9,7 @@ import com.nickzhang.customcert.annotation.Column;
 import com.nickzhang.customcert.annotation.Table;
 import com.nickzhang.customcert.annotation.TableMapper;
 import com.nickzhang.customcert.mapper.UtilsMapper;
+import com.nickzhang.customcert.xml.ClassNoInfo;
 import com.nickzhang.customcert.xml.XmlActionConsequence;
 import com.nickzhang.customcert.xml.XmlData;
 import com.nickzhang.customcert.xml.XmlProducer;
@@ -41,6 +42,8 @@ public class XmlService  implements InitializingBean {
     private final HashMap<String, BaseMapper<?>> mapperList = new HashMap<>();
     private final HashMap<String, PoJoEntry> mainPoJoEntryMap = new HashMap<>();
     private final HashMap<String, List<SubPoJoEntry>> belongDividedPojoEntryMap = new HashMap<>();
+
+    private final HashMap<String, ClassNoInfo> getIdFromNoMap = new HashMap<>();
 
     /**
      * 应用上下文
@@ -92,6 +95,10 @@ public class XmlService  implements InitializingBean {
             }
         }
         return fileNameList;
+    }
+
+    public String getMainIdFromNo(String showName,String no) {
+        return utilsMapper.getIdFromNo(getIdFromNoMap.get(showName),no);
     }
 
 
@@ -147,6 +154,8 @@ public class XmlService  implements InitializingBean {
             Class<?> belongTo = table.belongTo();
             if (belongTo == Object.class ) {
                 mainPoJoEntryMap.put(table.showName(),new PoJoEntry().setPoJoClass(poJoClass).setTable(table));
+                // 记录编号字段
+                getClassNoinfo(poJoClass, table);
             } else if (table.dividedFile()) { // 新增从属独立文件逻辑
                 SubPoJoEntry poJoEntry = new SubPoJoEntry();
                 poJoEntry.setPoJoClass(poJoClass).setTable(table);
@@ -180,7 +189,7 @@ public class XmlService  implements InitializingBean {
                         .setBelongLinkColumn(subJoinColumn)
                         .setBelongTableMainColumn(subTableMainColumn);
 
-
+                getClassNoinfo(poJoClass, table);
 
             } else {
                 List<Class<?>> pojoClasses = pojoListMap.computeIfAbsent(belongTo.getName(), k -> new ArrayList<>());
@@ -201,6 +210,22 @@ public class XmlService  implements InitializingBean {
 //        }));
         log.info("已初始化所有构造器");
         log.info("XmlService初始化完成");
+    }
+
+    private void getClassNoinfo(Class<?> poJoClass, Table table) {
+        try {
+            Field noField = Arrays.stream(poJoClass.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Column.class)).filter(field -> field.getAnnotation(Column.class).isNo()).findFirst().get();
+            Field mainField = Arrays.stream(poJoClass.getDeclaredFields()).filter(field -> field.isAnnotationPresent(TableId.class)).findFirst().get();
+            getIdFromNoMap.put(table.showName(),
+                    new ClassNoInfo().setShowName(table.showName())
+                            .setMainColumn(mainField.getAnnotation(TableField.class).value())
+                            .setNoColumn(noField.getAnnotation(TableField.class).value())
+                            .setMainTable(poJoClass.getAnnotation(TableName.class).value())
+            );
+        } catch (Exception e) {
+            log.error("获取类{}的证书编号字段失败",poJoClass.getSimpleName(),e);
+        }
+
     }
 
     @Override
@@ -255,3 +280,5 @@ class SubPoJoEntry extends PoJoEntry {
                 '}';
     }
 }
+
+
