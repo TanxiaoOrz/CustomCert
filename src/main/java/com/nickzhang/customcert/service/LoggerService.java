@@ -53,7 +53,7 @@ public class LoggerService {
     public List<Long> writeXmlLog(List<XmlActionConsequence> xmlActionConsequences) {
 
         List<XmlLog> xmlLogs = xmlActionConsequences.stream().map(xmlActionConsequence -> new XmlLog()
-                .setTypeName(xmlActionConsequence.getFileName())
+                .setTypeName(xmlActionConsequence.getTypeName())
                 .setMainId(xmlActionConsequence.getMainId())
                 .setInputFile(xmlActionConsequence.getFileName())
                 .setInputFileContext(xmlActionConsequence.getContext())
@@ -113,14 +113,19 @@ public class LoggerService {
             }
         });
         logger.info("查询结果数据成功{}，失败{}，待查询{}", consequence[0], consequence[1], consequence[2]);
+        xmlLogMapper.insertOrUpdate(xmlLogs);
 
         return new ArrayList<>(Arrays.asList(consequence));
     }
 
     private XmlLogStatus getXmlLogStatus(XmlLog xmlLog, List<Resource> answerFiles) {
-        String fileName = xmlLog.getAnswerFile().replace(".xml", "");
-
-        Optional<Resource> optional = answerFiles.stream().filter(resource -> resource.getFilename().contains(fileName)).findFirst();
+        String fileName = xmlLog.getInputFile().replace(".xml", "");
+        String excludePatternStr = Pattern.quote(fileName) + "_\\d+_";
+        Pattern excludePattern = Pattern.compile(excludePatternStr);
+        Optional<Resource> optional = answerFiles.stream()
+                .filter(resource -> resource.getFilename().contains(fileName))
+                .filter(resource -> !excludePattern.matcher(resource.getFilename()).find())
+                .findFirst();
         if (optional.isEmpty()) {
             logger.warn("待查询结果数据{}", xmlLog);
             return XmlLogStatus.wait;
@@ -148,7 +153,9 @@ public class LoggerService {
             logger.info("失败结果数据{}", xmlLog);
             return XmlLogStatus.fail;
         }
-        throw new IllegalArgumentException("文件名格式不符，未提取到有效状态：" + answerFile.getFilename());
+        logger.error("文件名格式不符，未提取到有效状态：{}", answerFile.getFilename());
+        return XmlLogStatus.wait;
+//        throw new RuntimeException("文件名格式不符，未提取到有效状态：" + answerFile.getFilename());
     }
 
 
@@ -159,7 +166,7 @@ public class LoggerService {
      */
     public static Date extractTimeStampFromFileName(String fullFileName) {
         final Pattern TIME_STAMP_PATTERN = Pattern.compile("_(\\d{17})\\.xml$");
-        final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssfff");
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         // 1. 判空校验
         if (fullFileName == null || fullFileName.trim().isEmpty()) {
             System.err.println("文件名不能为空");
@@ -187,7 +194,7 @@ public class LoggerService {
         Resource[] resources;
         // 3. 解析目录，获取所有资源对象
         try {
-            resources = resourceResolver.getResources(filePathRoot + consequencePath + "*.xml");
+            resources = resourceResolver.getResources("file:"+filePathRoot + consequencePath + "*.xml");
         } catch (IOException e) {
             throw new RuntimeException("获取操作结果文件失败", e);
         }

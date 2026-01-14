@@ -16,6 +16,7 @@ import java.util.Date;
 @Data
 @Accessors(chain = true)
 public class XmlActionConsequence {
+    private String typeName;
     private String filePath;
     private String fileName;
     private String context;

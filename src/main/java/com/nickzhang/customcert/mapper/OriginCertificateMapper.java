@@ -1,5 +1,6 @@
 package com.nickzhang.customcert.mapper;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nickzhang.customcert.annotation.TableMapper;
 import com.nickzhang.customcert.pojo.OriginCertificate;

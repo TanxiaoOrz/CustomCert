@@ -97,8 +97,14 @@ public class XmlService  implements InitializingBean {
         return fileNameList;
     }
 
+    @DS("pojo")
     public String getMainIdFromNo(String showName,String no) {
         return utilsMapper.getIdFromNo(getIdFromNoMap.get(showName),no);
+    }
+
+    @DS("pojo")
+    public String getNoFromId(String showName,String no) {
+        return utilsMapper.getNoFormId(getIdFromNoMap.get(showName),no);
     }
 
 

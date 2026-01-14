@@ -47,6 +47,14 @@ public interface UtilsMapper {
       * @param classNoInfo 编号值
       * @return 主表主键值
       */
-     @Select("select ${mainColumn} from ${mainTable} where ${noColumn} = #{no}")
+     @Select("select ${classNoInfo.mainColumn} from ${classNoInfo.mainTable} where ${classNoInfo.noColumn} = #{no}")
      String getIdFromNo(ClassNoInfo classNoInfo,String no);
+     /**
+      * 根据主键值获取编号
+      * @param classNoInfo 编号值
+      * @param id 主表主键值
+      * @return 编号
+      */
+     @Select("select ${classNoInfo.noColumn} from ${classNoInfo.mainTable} where ${classNoInfo.mainColumn} = #{id}")
+     String getNoFormId(ClassNoInfo classNoInfo, String id);
 }

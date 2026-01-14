@@ -22,6 +22,7 @@ import lombok.Data;
 @Table(xmlName = "EEntDeclIo", showName = "出入境检疫单",
         schemaLocation = "http://www.chinaport.gov.cn/ciq DecCiqMessage.xsd",
         nameSpaces = {"","http://www.chinaport.gov.cn/ciq","xsi","http://www.w3.org/2001/XMLSchema-instance"}
+        ,filePath = "Tecciq/"
 )
 public class ExitInspectionQuarantineOrder {
 
@@ -39,7 +40,7 @@ public class ExitInspectionQuarantineOrder {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Ent_Decl_No")
-    @Column(xmlName = "")
+    @Column(xmlName = "",isNo = true)
     private String entDeclNo;
 
     /**
@@ -47,7 +48,7 @@ public class ExitInspectionQuarantineOrder {
      */
     // 冗余节点：xmlName 置为空
     @TableField("Decl_No")
-    @Column(xmlName = "" ,isNo = true)
+    @Column(xmlName = "" )
     private String declNo;
 
     /**

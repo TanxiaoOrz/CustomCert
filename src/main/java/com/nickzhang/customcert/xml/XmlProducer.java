@@ -14,6 +14,7 @@ import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 
+import java.io.File;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -350,21 +351,27 @@ public class XmlProducer {
             xmlWriter.write(document);
             xmlWriter.close();
             String xmlText = writer.toString().replace(" xmlns=\"\"", "").replaceAll("(?m)^[ \\t]*\\r?\\n", "");
-            Path path = Paths.get( NodeUtils.getFilePathRoot() + classFilePath+NodeUtils.getInputFilePath()  + baseFileName + ".xml");
+
+            String dirPath = NodeUtils.getFilePathRoot() + classFilePath+ NodeUtils.getInputFilePath();
+            if (! new File(dirPath).exists()) {
+                Files.createDirectories(Paths.get(dirPath));
+            }
+            Path path = Paths.get(dirPath  + baseFileName + ".xml");
             int trial = 0;
             String fileName = baseFileName;
             while (Files.exists(path)) {
                 trial++;
                 fileName = baseFileName + "_" + trial;
-                path = Paths.get(NodeUtils.getFilePathRoot() + classFilePath + NodeUtils.getInputFilePath() + fileName + ".xml" );
+                path = Paths.get(dirPath + fileName + ".xml" );
             }
             Files.write(path, xmlText.getBytes(),StandardOpenOption.CREATE_NEW);
             return new XmlActionConsequence()
                     .setFileName(fileName)
-                    .setFilePath(NodeUtils.getFilePathRoot() + classFilePath)
+                    .setFilePath( NodeUtils.getFilePathRoot() + classFilePath)
                     .setContext(xmlText)
                     .setSuccess(true)
-                    .setMainId(mainId.toString());
+                    .setMainId(mainId.toString())
+                    .setTypeName(typeName);
         } catch (Exception e) {
             throw new RuntimeException("xml文件生产失败", e);
         }

@@ -9,12 +9,14 @@ spring:
       strict: false # 关闭严格模式，允许未匹配到数据源时使用主数据源（默认 false，可选保留）
       datasource:
         master:
-          url: jdbc:sqlserver://192.168.43.88:1433;databaseName=customcert;encrypt=false
+          #url: jdbc:sqlserver://192.168.43.88:1433;databaseName=customcert;encrypt=false
+          url: jdbc:sqlserver://127.0.0.1:1433;databaseName=customcert;encrypt=false
           username: zjs
           password: 1
           driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver # 驼峰命名，更规范
         pojo:
-          url: jdbc:sqlserver://192.168.43.88:1433;databaseName=RJECIQ;encrypt=false
+          #url: jdbc:sqlserver://192.168.43.88:1433;databaseName=RJECIQ;encrypt=false
+          url: jdbc:sqlserver://127.0.0.1:1433;databaseName=RJECIQ;encrypt=false
           username: zjs
           password: 1
           driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver # 驼峰命名，更规范
@@ -31,4 +33,4 @@ springdoc:
     enabled: true  # 启用Swagger UI
     tags-sorter: alpha  # 标签排序方式,alpha表示按字母排序
     operations-sorter: alpha  # 操作排序方式
-  show-actuator: false  # 是否显示Actuator端点,默认false
+  show-actuator: true  # 是否显示Actuator端点,默认false
