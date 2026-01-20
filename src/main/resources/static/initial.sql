@@ -58,3 +58,38 @@ BEGIN
 END
 
 Go
+-- 1. 存在则删除视图（独立批处理，GO分隔）
+-- SQL Server 2005 专用：判断视图存在则删除（无 IF EXISTS 语法）
+IF OBJECT_ID(N'dbo.origin_certificate_xml_logs', N'V') IS NOT NULL
+BEGIN
+DROP VIEW dbo.origin_certificate_xml_logs;
+PRINT N'视图 origin_certificate_xml_logs 已存在，已删除！';
+END
+GO
+
+-- 2. 创建视图（当前批处理的第一条语句，符合语法规则）
+CREATE VIEW dbo.origin_certificate_xml_logs AS
+SELECT
+    b.*,
+    CASE WHEN logs.status IS NULL THEN 'unexpire' ELSE logs.status END AS xml_status,
+    logs.latest_time,
+    logs.main_id,
+    logs.input_date_time,
+    logs.type_name
+FROM RJECIQ.dbo.Ori_B_Cert_Edi AS b
+         LEFT JOIN (
+    SELECT
+        main_id,
+        MAX(input_date_time) AS latest_time,
+        input_date_time,
+        status,
+        type_name
+    FROM xml_log
+    WHERE type_name = '海关原产地证书'
+    GROUP BY main_id, input_date_time, status, type_name
+) AS logs ON b.Cert_Id = logs.main_id AND logs.input_date_time = logs.latest_time;
+GO
+
+-- 3. 提示创建成功
+PRINT N'视图 origin_certificate_xml_logs 创建/重建成功！';
+GO

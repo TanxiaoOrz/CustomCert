@@ -5,6 +5,7 @@ import com.nickzhang.customcert.log.XmlLog;
 import com.nickzhang.customcert.log.XmlLogStatus;
 import com.nickzhang.customcert.mapper.XmlLogMapper;
 import com.nickzhang.customcert.xml.XmlActionConsequence;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -66,6 +68,11 @@ public class LoggerService {
         xmlLogMapper.insert(xmlLogs);
         xmlLogs.forEach(xmlLog -> logger.info("插入日志数据{}", xmlLog));
         return xmlLogs.stream().map(XmlLog::getId).collect(Collectors.toList());
+    }
+
+    @Scheduled(cron = "0 0 * * * ?")
+    public void checkReturn() {
+        checkReturn("");
     }
 
     /**
