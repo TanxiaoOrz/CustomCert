@@ -1,0 +1,1 @@
+.\jdk-21.0.9\bin\java -jar CustomCert-1.0.0-Release.jar
